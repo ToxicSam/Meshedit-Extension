@@ -49,9 +49,19 @@
         <p> If you are working on an interactive system, describe what demo you will create. </p>
         <p> Define how you will measure the quality / performance of your system (e.g. graphs showing speedup, or quantifying accuracy). It may not be possible to define precise target metrics at this time, but we encourage you to try.</p>
         <p> What questions do you plan to answer with your analysis? </p>
+
         <p> You should break this section into two parts: (1) what you plan to deliver, and (2) what you hope to deliver. In (1), describe what you believe you must accomplish to have a successful project and achieve the grade you expect (i.e. your baseline plan -- planning for some unexpected problems would make sense). In (2), describe what you hope to achieve if things go well and you get ahead of schedule (your aspirational plan). </p>
 
+
         <h3 align="middle">What We Plan to Deliver</h3>
+        <p>Our team plans to at least deliver an augmented HW2 based on the two aforementioned papers. With Remeshing, our goal is to give our program the ability to rearrange edges and vertices such that all triangles are resized to be equilateral and degenerate triangles/angles are removed. As a result, any mesh that we remesh will have a more regularized yet similar appearance to the original, while also being compatible with faster, stabler and more robust operations. </p>
+
+        <p>Like its name implies, Mesh Simplification smoothly and logically removes edges/vertices from a given mesh; this process reduces the mesh's complexity while preserving the general shape of the original, allowing for more efficient storage and processing.</p>
+
+        <p>We are confident in our ability to implement both Remeshing and Surface Simplification because of their intrinsic relationship with the work we did in HW2. Our experience with halfedges, mesh editing operations like edge flip/split and loop subdivision serves as a solid foundation for us to tackle these two challenges. The research papers that we rely on are thoroughly, clearly laid out, and their topics seem to be well documented in other online resources. </p>
+
+        <p>To demonstrate the performance improvements of these methods, we plan to primarily use before-and-after comparisons between required storage, number of triangles and time complexity. This will allow us to formally investigate questions like "Is regularizing/simplifying a mesh worth the extra initial cost," or "For what applications do these savings benefit the most, if at all?" It will also be possible to informally perceive the performance by the naked eye, as our meshes should be maintaining the same shape throughout. </p>
+        
         <div align="center">
             <table style="width=100%">
                 <tr>
@@ -65,6 +75,17 @@
             </table>
         </div>
         <h3 align="middle">What We Hope to Deliver</h3>
+        <p> Our hope is that we'll be able to complete the Remeshing and Surface Simplification features in a short enough time span to allow us to introduce Point Cloud to Mesh functionality; that is, the ability to convert a batch of unconnected points in 3D space into a cohesive mesh. We believe this is a logical progression from our previous goal, as we'll be able to apply Remeshing and Simplification on any mesh produced from a point cloud. By using the Ball Point Algorithm described in <a href="http://www.research.ibm.com/vistechnology/pdf/bpa_tvcg.pdf">this paper</a>, we expect to produce accurate, similarly shaped meshes compared to our point cloud inputs. Though this goal is more technically complex and isn't directly compatible with our existing HW2 code, it won't be too far fetched to achieve with the additional experience from implementing Remeshing and Mesh Simplification.</p>
+        <p>To measure our success in creating such a system, we will likely compare the number of mesh elements that we create to represent the original point cloud with the number of original points. It will also be easy to manually check for deficiencies and holes in our newly created mesh. From these, we'll be able to evaluate what shapes of point clouds produce the fastest or most faithful mesh representations.</p>
+        <div align="center">
+            <table style="width=100%">
+                <tr>
+                    <td align="middle">
+                    <img src="images/pointCloud.jpg" width="480px" />
+                    <figcaption align="middle">Example of Point Cloud to Mesh reconstruction </figcaption>
+                </tr>
+            </table>
+        </div>
 
     <h2 align="middle">Schedule</h2>
         <p> In this section you should organize and plan the tasks and subtasks that your team will execute. Since presentations are 2.5 weeks from the due-date of the proposal, we recommend that you include a task for every half week.</p>

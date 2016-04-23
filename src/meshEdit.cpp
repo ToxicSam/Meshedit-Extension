@@ -240,6 +240,11 @@ namespace CGL {
             case 'S':
                 splitSelectedEdge();
                 break;
+            case 'c':
+            case 'C':
+                collapseSelectedEdge();
+                printf("%s\n", "Collapsing Selected Edge...");
+                break;
             case 'n':
             case 'N':
                 selectNextHalfedge();
@@ -1483,6 +1488,20 @@ namespace CGL {
             return;
         }
         selectedFeature.node->mesh.flipEdge(e->halfedge()->edge());
+
+        // Since the mesh may have changed, the selected and
+        // hovered features may no longer point to valid elements.
+        selectedFeature.invalidate();
+        hoveredFeature.invalidate();
+    }
+
+    void MeshEdit::collapseSelectedEdge(void) {
+        Edge* e = selectedFeature.element->getEdge();
+        if (e == NULL) {
+            cerr << "Must select an edge." << endl;
+            return;
+        }
+        selectedFeature.node->mesh.collapseEdge(e->halfedge()->edge());
 
         // Since the mesh may have changed, the selected and
         // hovered features may no longer point to valid elements.

@@ -361,6 +361,7 @@ namespace CGL {
         // Local operations on current element.
         void flipSelectedEdge(void);
         void splitSelectedEdge(void);
+        void collapseSelectedEdge(void);
         // Sets up and calls the MeshResampler with the appropiate operation.
         void mesh_up_sample();
 

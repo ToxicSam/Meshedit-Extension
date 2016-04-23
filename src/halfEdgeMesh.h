@@ -804,6 +804,7 @@ namespace CGL {
          * polygonal meshes?)
          */
         EdgeIter flipEdge(EdgeIter e); ///< flip an edge, returning a pointer to the flipped edge
+        VertexIter collapseEdge(EdgeIter e); ///< collapse an edge, returning a pointer to the collapsed vertex
         VertexIter splitEdge(EdgeIter e); ///< split an edge, returning a pointer to the inserted midpoint vertex; the halfedge of this vertex should refer to one of the edges in the original mesh
 
         void check_for(HalfedgeIter h) {

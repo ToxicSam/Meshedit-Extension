@@ -101,6 +101,12 @@ namespace CGL {
         return n.unit();
     }
 
+    VertexIter HalfedgeMesh::collapseEdge( EdgeIter e) 
+    {
+        // TODO This method should collapse the given edge and return an iterator to the new vertex created by the collapse
+        return VertexIter();
+    }
+
     EdgeIter HalfedgeMesh::flipEdge(EdgeIter e0) {
         // TODO Part 3.
         // TODO This method should flip the given edge and return an iterator to the flipped edge.
@@ -208,6 +214,7 @@ namespace CGL {
 
         return v4;
     }
+
 
     void MeshResampler::upsample(HalfedgeMesh& mesh)
     // TODO Part 5.

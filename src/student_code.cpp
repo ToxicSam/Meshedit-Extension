@@ -117,8 +117,7 @@ namespace CGL {
         centroid = avg / (float) degree();
     }
 
-    VertexIter HalfedgeMesh::collapseEdge( EdgeIter e0) 
-
+     VertexIter HalfedgeMesh::collapseEdge( EdgeIter e0) 
     {
         // TODO This method should collapse the given edge and return an iterator to the new vertex created by the collapse
         if (e0->isBoundary()) {
@@ -323,6 +322,9 @@ namespace CGL {
 
         return VertexIter();
     }
+
+
+
 
     EdgeIter HalfedgeMesh::flipEdge(EdgeIter e0) {
         // TODO Part 3.
@@ -552,6 +554,7 @@ namespace CGL {
     }
 
     void MeshResampler::remesh(HalfedgeMesh& mesh) {
+        cout << "remeshing" << "\n";
         double l = 0.0;
         int count = 0;
         // Calculate average edge length
@@ -565,7 +568,7 @@ namespace CGL {
             if (e->length() > 4.0/3.0 * l) {
                 mesh.splitEdge(e);
             } else if (e->length() < 4.0/5.0 * l) {
-                mesh.collapseEdge(e);
+                //mesh.collapseEdge(e);
             }
         }
 

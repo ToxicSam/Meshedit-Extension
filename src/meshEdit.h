@@ -364,6 +364,7 @@ namespace CGL {
         void collapseSelectedEdge(void);
         // Sets up and calls the MeshResampler with the appropiate operation.
         void mesh_up_sample();
+        void mesh_remesh();
 
         // If a halfedge is selected, advances to the next or twin halfedge.
         void selectNextHalfedge(void);

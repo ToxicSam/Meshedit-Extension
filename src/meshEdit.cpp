@@ -227,7 +227,11 @@ namespace CGL {
             case 'U':
                 mesh_up_sample();
                 break;
-
+            case 'x':
+            case 'X':
+                printf("fjkldsajflkadsjfklajs");
+                mesh_remesh();
+                break;
             case 'i':
             case 'I':
                 showHUD = !showHUD;
@@ -916,6 +920,21 @@ namespace CGL {
 
         // Since the mesh may have changed, the selected and
         // hovered features may no longer point to valid elements.
+        selectedFeature.invalidate();
+        hoveredFeature.invalidate();
+    }
+    void MeshEdit::mesh_remesh() {
+        HalfedgeMesh* mesh;
+        cout << "fjlkdajflkdasj " << "\n";
+
+        if (selectedFeature.isValid()) {
+            mesh = &(selectedFeature.node->mesh);
+        } else {
+            mesh = &(meshNodes.begin()->mesh);
+        }
+
+        resampler.remesh(*mesh);
+
         selectedFeature.invalidate();
         hoveredFeature.invalidate();
     }

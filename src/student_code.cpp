@@ -117,7 +117,7 @@ namespace CGL {
         centroid = avg / (float) degree();
     }
 
-    VertexIter HalfedgeMesh::collapseEdge( EdgeIter e) 
+    VertexIter HalfedgeMesh::collapseEdge( EdgeIter e0) 
 
     {
         // TODO This method should collapse the given edge and return an iterator to the new vertex created by the collapse

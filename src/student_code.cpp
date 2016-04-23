@@ -101,7 +101,24 @@ namespace CGL {
         return n.unit();
     }
 
-    VertexIter HalfedgeMesh::collapseEdge( EdgeIter e0) 
+
+    void Vertex::computeCentroid(void) {
+        Vector3D avg = Vector3D();
+        HalfedgeCIter h = halfedge(); 
+        h = h->twin(); 
+        HalfedgeCIter horig = h;
+        do {
+            Vector3D v0 = h->vertex()->position;
+            h = h->next();
+            h = h->twin();
+            avg += v0;
+
+        } while (h != horig);
+        centroid = avg / (float) degree();
+    }
+
+    VertexIter HalfedgeMesh::collapseEdge( EdgeIter e) 
+
     {
         // TODO This method should collapse the given edge and return an iterator to the new vertex created by the collapse
         if (e0->isBoundary()) {
@@ -534,7 +551,47 @@ namespace CGL {
         }
     }
 
-    // TODO Part 6.
-    // TODO There's also some code you'll need to complete in "Shader/frag" file.
+    void MeshResampler::remesh(HalfedgeMesh& mesh) {
+        double l = 0.0;
+        int count = 0;
+        // Calculate average edge length
+        for (EdgeIter e = mesh.edgesBegin(); e != mesh.edgesEnd(); e++) {
+            l += e->length();
+            count++;
+        }
+        l = l / (double) count;
+        // Split edges longer than (4/3)l
+        for (EdgeIter e = mesh.edgesBegin(); e != mesh.edgesEnd(); e++) {
+            if (e->length() > 4.0/3.0 * l) {
+                mesh.splitEdge(e);
+            } else if (e->length() < 4.0/5.0 * l) {
+                mesh.collapseEdge(e);
+            }
+        }
 
+        // Flip edges for variance improvement
+        for (EdgeIter e = mesh.edgesBegin(); e != mesh.edgesEnd(); e++) {
+            int a1 = e->halfedge()->vertex()->degree();
+            int a2 = e->halfedge()->twin()->vertex()->degree();
+            int b1 = e->halfedge()->next()->next()->vertex()->degree();
+            int b2 = e->halfedge()->twin()->next()->next()->vertex()->degree();
+            int oldvar = abs(a1 - 6) + abs(a2 - 6) + abs(b1 - 6) + abs(b2 - 6);
+            int newvar = abs(a1-1-6) + abs(a2-1-6) + abs(b1+1-6) + abs(b2+1-6);
+            if (newvar < oldvar) {
+                mesh.flipEdge(e);
+            }
+        }
+        for (int i = 0; i < 10; i++) {
+            // Compute centroids
+            for (VertexIter v = mesh.verticesBegin(); v != mesh.verticesEnd(); v++) {
+                v->computeCentroid();
+            }
+            // Move vertices
+            for (VertexIter v = mesh.verticesBegin(); v != mesh.verticesEnd(); v++) {
+                double weight = 1.0 / 5.0;
+                Vector3D dir = (v->centroid - v->position);
+                v->position = v->position + weight * (dir - dot(v->normal(), dir) * v->normal());
+            }
+        }
+    }
 }

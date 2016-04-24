@@ -117,10 +117,36 @@ namespace CGL {
         centroid = avg / (float) degree();
     }
 
-     VertexIter HalfedgeMesh::collapseEdge( EdgeIter e0) 
+    VertexIter HalfedgeMesh::collapseEdge( EdgeIter e0) 
     {
         // TODO This method should collapse the given edge and return an iterator to the new vertex created by the collapse
         if (e0->isBoundary()) {
+            return VertexIter();
+        }
+
+        HalfedgeCIter ch = e0->halfedge();
+        HalfedgeCIter dh = e0->halfedge()->twin();
+        int neighborcount = 0;
+        int loopcount = 0;
+        do {
+            // cout << "loopcount " << loopcount << endl;
+            HalfedgeCIter chtwin = ch->twin();
+            VertexCIter cneighbor = chtwin->vertex();
+            do {
+                HalfedgeCIter dhtwin = dh->twin();
+                VertexCIter vneighbor = dhtwin->vertex();
+                if (cneighbor == vneighbor) {
+                    // cout << "COMMON NEIGHBOR FOUND" << endl;
+                    neighborcount += 1;
+                }
+                dh = dhtwin->next();
+            } while (dh != e0->halfedge()->twin());
+            ch = chtwin->next();
+        } while (ch != e0->halfedge());
+
+        cout << "Number of shared neighbors = " << neighborcount << endl;
+        if (neighborcount != 2) {
+            cout << "WARNING: collapse aborted due to more than one shared neighbor vertex.";
             return VertexIter();
         }
 
@@ -206,7 +232,7 @@ namespace CGL {
         EdgeIter e15 = h2->edge();
         EdgeIter e16 = h1->edge();
         EdgeIter e17 = h15->edge();
-        EdgeIter e18 = h16->edge();        
+        EdgeIter e18 = h16->edge();
 
         m->position = (c->position + d->position) / 2;
 
@@ -222,7 +248,61 @@ namespace CGL {
         FaceIter f8 = h0->face(); //to be deleted
         FaceIter f9 = h29->face(); //to be deleted
 
-        printf("%s\n", "Collected correctly");
+        // printf("%s\n", "Collected correctly");
+
+        //n = n + cross(v1-v0,v2-v1); REFERENCE
+        Vector3D f0normalbefore = cross(v1->position - c->position, a->position - c->position).unit();
+        Vector3D f0normalafter = cross(v1->position - m->position, a->position - m->position).unit();
+
+        Vector3D f1normalbefore = cross(v1->position - c->position, v2->position - c->position).unit();
+        Vector3D f1normalafter = cross(v1->position - m->position, v2->position - m->position).unit();
+
+        Vector3D f2normalbefore = cross(v3->position - c->position, v2->position - c->position).unit();
+        Vector3D f2normalafter = cross(v3->position - m->position, v2->position - m->position).unit();
+
+        Vector3D f3normalbefore = cross(v3->position - c->position, b->position - c->position).unit();
+        Vector3D f3normalafter = cross(v3->position - m->position, b->position - m->position).unit();
+
+        Vector3D f4normalbefore = cross(v4->position - d->position, b->position - d->position).unit();
+        Vector3D f4normalafter = cross(v4->position - m->position, b->position - m->position).unit();
+
+        Vector3D f5normalbefore = cross(v5->position - d->position, v4->position - d->position).unit();
+        Vector3D f5normalafter = cross(v5->position - m->position, v4->position - m->position).unit();
+
+        Vector3D f6normalbefore = cross(v6->position - d->position, v5->position - d->position).unit();
+        Vector3D f6normalafter = cross(v6->position - m->position, v5->position - m->position).unit();
+
+        Vector3D f7normalbefore = cross(v6->position - d->position, a->position - d->position).unit();
+        Vector3D f7normalafter = cross(v6->position - m->position, a->position - m->position).unit();
+
+        /*
+        If triangle has been flipped = if angle between before and after normals > 180 degrees
+        */
+        double f0angle = acos(dot(f0normalbefore, f0normalafter));
+        double f1angle = acos(dot(f1normalbefore, f1normalafter));
+        double f2angle = acos(dot(f2normalbefore, f2normalafter));
+        double f3angle = acos(dot(f3normalbefore, f3normalafter));
+        double f4angle = acos(dot(f4normalbefore, f4normalafter));
+        double f5angle = acos(dot(f5normalbefore, f5normalafter));
+        double f6angle = acos(dot(f6normalbefore, f6normalafter));
+        double f7angle = acos(dot(f7normalbefore, f7normalafter));
+
+        cout << "f0 angle = " << f0angle << endl;
+        cout << "f1 angle = " << f1angle << endl;
+        cout << "f2 angle = " << f2angle << endl;
+        cout << "f3 angle = " << f3angle << endl;
+        cout << "f4 angle = " << f4angle << endl;
+        cout << "f5 angle = " << f5angle << endl;
+        cout << "f6 angle = " << f6angle << endl;
+        cout << "f7 angle = " << f7angle << endl;
+
+
+        if (f0angle > M_PI || f1angle > M_PI || f2angle > M_PI || f3angle > M_PI || f4angle > M_PI || f5angle > M_PI || f6angle > M_PI || f7angle > M_PI) {
+            cout << "WARNING: collapse aborted due to flipped triangle.";
+            return VertexIter();
+        }
+
+
 
         //REASSIGN
 
@@ -255,7 +335,7 @@ namespace CGL {
         f7->halfedge() = h26;
 
 
-        printf("%s\n", "REASSIGN1");
+        // printf("%s\n", "REASSIGN1");
 
         v1->halfedge() = h7;
         v2->halfedge() = h10;
@@ -266,7 +346,7 @@ namespace CGL {
         b->halfedge() = h4;
         a->halfedge() = h28;
 
-//h0
+        //h0
         //h1
         //h2
         h3->setNeighbors(h4, h28, m, am, f0);//
@@ -297,7 +377,7 @@ namespace CGL {
         h28->setNeighbors(h26, h3, a, am, f7);//
         //h29
 
-        printf("%s\n", "REASSIGN3");
+        // printf("%s\n", "REASSIGN3");
 
         deleteVertex(c);
         deleteVertex(d);
@@ -318,7 +398,7 @@ namespace CGL {
         deleteHalfedge(h15);
         deleteHalfedge(h16);
 
-        printf("%s\n", "REASSIGN4");
+        // printf("%s\n", "REASSIGN4");
 
         return VertexIter();
     }

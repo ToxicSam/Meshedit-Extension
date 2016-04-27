@@ -296,6 +296,13 @@ namespace CGL {
         cout << "f6 angle = " << f6angle << endl;
         cout << "f7 angle = " << f7angle << endl;
 
+        cout << "this is m_pi: " << M_PI << endl;
+
+        // if (f7angle > M_PI) {
+        //     cout << "warning" << endl;
+        //     return VertexIter();
+        // }
+
 
         if (f0angle > M_PI || f1angle > M_PI || f2angle > M_PI || f3angle > M_PI || f4angle > M_PI || f5angle > M_PI || f6angle > M_PI || f7angle > M_PI) {
             cout << "WARNING: collapse aborted due to flipped triangle.";

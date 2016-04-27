@@ -117,7 +117,7 @@ namespace CGL {
         centroid = avg / (float) degree();
     }
 
-     VertexIter HalfedgeMesh::collapseEdge( EdgeIter e0) 
+    VertexIter HalfedgeMesh::collapseEdge( EdgeIter e0) 
     {
         // TODO This method should collapse the given edge and return an iterator to the new vertex created by the collapse
         if (e0->isBoundary()) {
@@ -154,6 +154,7 @@ namespace CGL {
         h7->next()->next()->next() = h7;
         h7->face() = h7->next()->face();
 
+
         HalfedgeIter hstop = h5;
 
         HalfedgeIter hmove = h6;
@@ -163,6 +164,7 @@ namespace CGL {
             hmove->vertex() = v1;
             hmove = hmove->twin();
         }
+
 
         deleteVertex(v0);
         deleteFace(f0);

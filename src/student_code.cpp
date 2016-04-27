@@ -123,10 +123,8 @@ namespace CGL {
         if (e0->isBoundary()) {
             return VertexIter();
         }
-
         HalfedgeIter h0 = e0->halfedge();
         HalfedgeIter h1 = h0->twin();
-
         HalfedgeIter h2 = h0->next();
         HalfedgeIter h3 = h1->next();
         HalfedgeIter h5 = h2->next(); 
@@ -146,6 +144,67 @@ namespace CGL {
         EdgeIter e3 = h3->edge();
         EdgeIter e4 = h9->edge();
         EdgeIter e5 = h10->edge();
+        /////////////////Number of neighbors check START/////////////////
+        HalfedgeCIter ch = e0->halfedge();
+        HalfedgeCIter dh = e0->halfedge()->twin();
+        int neighborcount = 0;
+        int loopcount = 0;
+         do {
+             HalfedgeCIter chtwin = ch->twin();
+             VertexCIter cneighbor = chtwin->vertex();
+             do {
+                 HalfedgeCIter dhtwin = dh->twin();
+                 VertexCIter vneighbor = dhtwin->vertex();
+                 if (cneighbor == vneighbor) {
+                     neighborcount += 1;
+                 }
+                 dh = dhtwin->next();
+             } while (dh != e0->halfedge()->twin());
+             ch = chtwin->next();
+         } while (ch != e0->halfedge());
+ 
+         cout << "Number of shared neighbors = " << neighborcount << endl;
+         if (neighborcount != 2) {
+            cout << "WARNING: collapse aborted due to more than one shared neighbor vertex.";
+             return VertexIter();
+         }
+        /////////////////Number of neighbors check END/////////////////
+
+        /////////////////Triangle flip check START/////////////////
+
+        Vector3D v1newpos = (v0->position + v1->position) / 2.0;
+
+        HalfedgeCIter leftmove = h9;
+        HalfedgeCIter leftstop = h7;
+        do {
+            Vector3D vertexApos = leftmove->vertex()->position;
+            Vector3D vertexBpos = leftmove->next()->next()->vertex()->position;
+            Vector3D beforenormal = cross(vertexApos - v1->position, vertexBpos - v1->position);
+            Vector3D afternormal = cross(vertexApos - v1newpos, vertexBpos - v1newpos);
+            if (dot(beforenormal, afternormal) < 0) {
+                cout << "WARNING: collapse aborted due to a flipped triangle.";
+                return VertexIter();
+            }
+            leftmove = leftmove->next()->twin();
+        } while (leftmove != leftstop);
+
+
+        HalfedgeCIter rightmove = h6;
+        HalfedgeCIter rightstop = h5;
+        do {
+            Vector3D vertexApos = rightmove->vertex()->position;
+            Vector3D vertexBpos = rightmove->next()->next()->vertex()->position;
+            Vector3D beforenormal = cross(vertexApos - v0->position, vertexBpos - v0->position);
+            Vector3D afternormal = cross(vertexApos - v1newpos, vertexBpos - v1newpos);
+
+            if (dot(beforenormal, afternormal) < 0) {
+                cout << "WARNING: collapse aborted due to a flipped triangle.";
+                return VertexIter();
+            }
+            rightmove = rightmove->next()->twin();
+        } while (rightmove != rightstop);
+        /////////////////Triangle flip check END/////////////////
+
 
         HalfedgeIter hstop = h5;
         HalfedgeIter hmove = h6;
@@ -155,9 +214,9 @@ namespace CGL {
             hmove = hmove->twin();
         } while (hmove != hstop);
 
-        v1->position = (v0->position + v1->position) / 2.0;
+        //Assign new position and halfedge to the shifted v1
+        v1->position = v1newpos;
         v1->halfedge() = h10;
-
         //Assign twins across deleted triangles
         h4->twin() = h9;
         h9->twin() = h4;
@@ -172,7 +231,7 @@ namespace CGL {
         //For the halfedges whose edges are to be removed, assign them new edges
         h4->edge() = e4;
         h6->edge() = e5;
-        //Redo deletions
+        //Delete everything within the collapsed space
         deleteVertex(v0);//
         deleteFace(f0);//
         deleteFace(f1);//
@@ -433,7 +492,7 @@ namespace CGL {
             if (e->length() > 4.0/3.0 * l) {
                 mesh.splitEdge(e);
             } else if (e->length() < 4.0/5.0 * l) {
-                //mesh.collapseEdge(e);
+                // mesh.collapseEdge(e);
             }
         }
 

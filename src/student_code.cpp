@@ -153,6 +153,9 @@ namespace CGL {
             hmove = hmove->next();
             hmove->vertex() = v1;
             hmove = hmove->twin();
+            cout << "forever 3 " << "\n";
+            cout << &*hmove << endl;
+            cout << &*hstop << endl;
         } while (hmove != hstop);
 
         v1->position = (v0->position + v1->position) / 2.0;
@@ -173,18 +176,18 @@ namespace CGL {
         h4->edge() = e4;
         h6->edge() = e5;
         //Redo deletions
-        deleteVertex(v0);//
-        deleteFace(f0);//
-        deleteFace(f1);//
-        deleteEdge(e0);//
-        deleteEdge(e3);//
-        deleteEdge(e2);//
-        deleteHalfedge(h0);
-        deleteHalfedge(h1);
-        deleteHalfedge(h2);
-        deleteHalfedge(h5);
-        deleteHalfedge(h7);
-        deleteHalfedge(h3);
+        // deleteVertex(v0);//
+        // deleteFace(f0);//
+        // deleteFace(f1);//
+        // deleteEdge(e0);//
+        // deleteEdge(e3);//
+        // deleteEdge(e2);//
+        // deleteHalfedge(h0);
+        // deleteHalfedge(h1);
+        // deleteHalfedge(h2);
+        // deleteHalfedge(h5);
+        // deleteHalfedge(h7);
+        // deleteHalfedge(h3);
         return v1;
     }
 
@@ -432,11 +435,23 @@ namespace CGL {
         for (EdgeIter e = mesh.edgesBegin(); e != mesh.edgesEnd(); e++) {
             if (e->length() > 4.0/3.0 * l) {
                 mesh.splitEdge(e);
-            } else if (e->length() < 4.0/5.0 * l) {
-                //mesh.collapseEdge(e);
             }
+            // cout << "forever 1" << "\n";
         }
 
+        EdgeIter e1 = mesh.edgesBegin();
+        while (e1 != mesh.edgesEnd()) {
+            EdgeIter e = e1;
+            e1++;
+            if (e->length() < 4.0/5.0 * l) {
+                cout << "about to collapse " << "\n";
+                mesh.collapseEdge(e);
+            }
+            cout << "difference between e1 and begin " << std::distance(mesh.edgesBegin(), e1) << "\n";
+            cout << "difference between end and begin " << std::distance(mesh.edgesBegin(), mesh.edgesEnd()) << "\n";
+            // cout << "forever 2" << "\n";
+        }
+    
         // Flip edges for variance improvement
         for (EdgeIter e = mesh.edgesBegin(); e != mesh.edgesEnd(); e++) {
             int a1 = e->halfedge()->vertex()->degree();

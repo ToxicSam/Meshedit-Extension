@@ -125,202 +125,58 @@ namespace CGL {
         }
 
         HalfedgeIter h0 = e0->halfedge();
-        HalfedgeIter h1 = h0->next();
-        HalfedgeIter h2 = h1->next();
-        HalfedgeIter h3 = h2->twin();
+        HalfedgeIter h1 = h0->twin();
+        HalfedgeIter h2 = h0->next();
+        HalfedgeIter h3 = h1->next();
+        VertexIter v0 = h0->vertex();
+        VertexIter v1 = h1->vertex();
+        FaceIter f0 = h0->face();
+        FaceIter f1 = h1->face();
+        EdgeIter e2 = h2->next()->edge();
+        EdgeIter e3 = h3->edge();
+        HalfedgeIter h5 = h2->next(); 
+        HalfedgeIter h4 = h5->twin();
+        HalfedgeIter h6 = h3->twin();
+        HalfedgeIter h7 = h3->next();
 
-        HalfedgeIter h4 = h3->next();
-        HalfedgeIter h5 = h4->next();
-        HalfedgeIter h6 = h5->twin();
+        // VertexIter vc = newVertex();
+        v1->position = (v0->position + v1->position) / 2.0;
+        v1->halfedge() = h2;
 
-        HalfedgeIter h7 = h6->next();
-        HalfedgeIter h8 = h7->next();
-        HalfedgeIter h9 = h8->twin();
-
-        HalfedgeIter h10 = h9->next();
-        HalfedgeIter h11 = h10->next();
-        HalfedgeIter h12 = h11->twin();
-
-        HalfedgeIter h13 = h12->next();
-        HalfedgeIter h14 = h13->next();
-        HalfedgeIter h15 = h14->twin();
-
-        HalfedgeIter h16 = h15->next();
-        HalfedgeIter h17 = h16->twin();
-        
-        HalfedgeIter h18 = h17->next();
-        HalfedgeIter h19 = h18->next();
-        HalfedgeIter h20 = h19->twin();
-        
-        HalfedgeIter h21 = h20->next();
-        HalfedgeIter h22 = h21->next();
-        HalfedgeIter h23 = h22->twin();
-        
-        HalfedgeIter h24 = h23->next();
-        HalfedgeIter h25 = h24->next();
-        HalfedgeIter h26 = h25->twin();
-        
-        HalfedgeIter h27 = h26->next();
-        HalfedgeIter h28 = h27->next();
-        HalfedgeIter h29 = h0->twin();
-
-        //VERTICES
-        VertexIter a = h2->vertex();
-        VertexIter b = h16->vertex();
-        VertexIter c = h0->vertex();
-        VertexIter d = h29->vertex();
-        VertexIter m = newVertex();
-        VertexIter v1 = h5->vertex();
-        VertexIter v2 = h8->vertex();
-        VertexIter v3 = h11->vertex();
-        VertexIter v4 = h19->vertex();
-        VertexIter v5 = h22->vertex();
-        VertexIter v6 = h25->vertex();
+        h2->next() = h4->next();
+        h2->next()->next()->next() = h2;
+        h2->face() = h2->next()->face();
+        h5->vertex()->halfedge() = h2->next();
 
 
-        //EDGES
-        EdgeIter am = newEdge();
-        EdgeIter mb = newEdge();
+        h7->next() = h6->next();
+        h7->next()->vertex() = v1;
+        h7->next()->next()->next() = h7;
+        h7->face() = h7->next()->face();
 
-        EdgeIter ad = h1->edge();
-        EdgeIter ac = h2->edge();
-        EdgeIter cb = h15->edge();
-        EdgeIter bd = h16->edge();
+        HalfedgeIter hstop = h5;
 
-        EdgeIter e1 = h6->edge();
-        EdgeIter e2 = h9->edge();
-        EdgeIter e3 = h12->edge();
-        EdgeIter e4 = h20->edge();
-        EdgeIter e5 = h23->edge();
-        EdgeIter e6 = h26->edge();
+        HalfedgeIter hmove = h6;
 
-        EdgeIter e7 = h27->edge();
-        EdgeIter e8 = h4->edge();
-        EdgeIter e9 = h7->edge();
-        EdgeIter e10 = h10->edge();
-        EdgeIter e11 = h13->edge();
-        EdgeIter e12 = h18->edge();
-        EdgeIter e13 = h21->edge();
-        EdgeIter e14 = h24->edge();
+        while (hmove != hstop) {
+            hmove = hmove->next();
+            hmove->vertex() = v1;
+            hmove = hmove->twin();
+        }
 
-        EdgeIter e15 = h2->edge();
-        EdgeIter e16 = h1->edge();
-        EdgeIter e17 = h15->edge();
-        EdgeIter e18 = h16->edge();        
-
-        m->position = (c->position + d->position) / 2;
-
-        //FACE
-        FaceIter f0 = h4->face();
-        FaceIter f1 = h7->face();
-        FaceIter f2 = h10->face();
-        FaceIter f3 = h13->face();
-        FaceIter f4 = h18->face();
-        FaceIter f5 = h21->face();
-        FaceIter f6 = h24->face();
-        FaceIter f7 = h27->face();
-        FaceIter f8 = h0->face(); //to be deleted
-        FaceIter f9 = h29->face(); //to be deleted
-
-        printf("%s\n", "Collected correctly");
-
-        //REASSIGN
-
-        //EDGES
-        e1->halfedge() = h5;
-        e2->halfedge() = h8;
-        e3->halfedge() = h11;
-        e4->halfedge() = h19;
-        e5->halfedge() = h22;
-        e6->halfedge() = h25;
-        am->halfedge() = h3;
-        mb->halfedge() = h14;
-        e7->halfedge() = h27;
-        e8->halfedge() = h4;
-        e9->halfedge() = h7;
-        e10->halfedge() = h10;
-        e11->halfedge() = h13;
-        e12->halfedge() = h18;
-        e13->halfedge() = h21;
-        e14->halfedge() = h24;
-
-        //FACES
-        f0->halfedge() = h3;
-        f1->halfedge() = h6;
-        f2->halfedge() = h9;
-        f3->halfedge() = h12;
-        f4->halfedge() = h17;
-        f5->halfedge() = h20;
-        f6->halfedge() = h23;
-        f7->halfedge() = h26;
-
-
-        printf("%s\n", "REASSIGN1");
-
-        v1->halfedge() = h7;
-        v2->halfedge() = h10;
-        v3->halfedge() = h13;
-        v4->halfedge() = h21;
-        v5->halfedge() = h24;
-        v6->halfedge() = h27;
-        b->halfedge() = h4;
-        a->halfedge() = h28;
-
-//h0
-        //h1
-        //h2
-        h3->setNeighbors(h4, h28, m, am, f0);//
-        h4->setNeighbors(h5, h4->twin(), a, e8, f0);//
-        h5->setNeighbors(h3, h6, v1, e1, f0);//
-        h6->setNeighbors(h7, h5, m, e1, f1);//
-        h7->setNeighbors(h8, h7->twin(), v1, e9, f1);//
-        h8->setNeighbors(h6, h9, v2, e2, f1);//
-        h9->setNeighbors(h10, h8, m, e2, f2);//
-        h10->setNeighbors(h11, h10->twin(), v2, e10, f2);
-        h11->setNeighbors(h9, h12, v3, e3, f2);//        
-        h12->setNeighbors(h13, h11, m, e3, f3);//
-        h13->setNeighbors(h14, h13->twin(), v3, e11, f3);
-        h14->setNeighbors(h12, h17, b, mb, f3);//
-        //h15
-        //h16
-        h17->setNeighbors(h18, h14, m, mb, f4);//
-        h18->setNeighbors(h19, h18->twin(), b, e12, f4);
-        h19->setNeighbors(h17, h20, v4, e4, f4);
-        h20->setNeighbors(h21, h19, m, e4, f5);//
-        h21->setNeighbors(h22, h21->twin(), v4, e13, f5);
-        h22->setNeighbors(h20, h23, v5, e5, f5);//
-        h23->setNeighbors(h24, h22, m, e5, f6);//
-        h24->setNeighbors(h25, h24->twin(), v5, e14, f6);
-        h25->setNeighbors(h23, h26, v6, e6, f6);//
-        h26->setNeighbors(h27, h25, m, e6, f7);//
-        h27->setNeighbors(h28, h27->twin(), v6, e7, f7);
-        h28->setNeighbors(h26, h3, a, am, f7);//
-        //h29
-
-        printf("%s\n", "REASSIGN3");
-
-        deleteVertex(c);
-        deleteVertex(d);
-
-        deleteEdge(e15);
-        deleteEdge(e16);
-        deleteEdge(e17);
-        deleteEdge(e18);
+        deleteVertex(v0);
+        deleteFace(f0);
+        deleteFace(f1);
         deleteEdge(e0);
-
-        deleteFace(f8);
-        deleteFace(f9);
-
-        deleteHalfedge(h1);
-        deleteHalfedge(h2);
+        deleteEdge(e3);
+        deleteEdge(e2);
         deleteHalfedge(h0);
-        deleteHalfedge(h29);
-        deleteHalfedge(h15);
-        deleteHalfedge(h16);
-
-        printf("%s\n", "REASSIGN4");
-
-        return VertexIter();
+        deleteHalfedge(h1);
+        deleteHalfedge(h3);
+        deleteHalfedge(h4);
+        deleteHalfedge(h5);
+        deleteHalfedge(h6);
+        return v1;
     }
 
 

@@ -126,58 +126,65 @@ namespace CGL {
 
         HalfedgeIter h0 = e0->halfedge();
         HalfedgeIter h1 = h0->twin();
+
         HalfedgeIter h2 = h0->next();
         HalfedgeIter h3 = h1->next();
-        VertexIter v0 = h0->vertex();
-        VertexIter v1 = h1->vertex();
-        FaceIter f0 = h0->face();
-        FaceIter f1 = h1->face();
-        EdgeIter e2 = h2->next()->edge();
-        EdgeIter e3 = h3->edge();
         HalfedgeIter h5 = h2->next(); 
         HalfedgeIter h4 = h5->twin();
         HalfedgeIter h6 = h3->twin();
         HalfedgeIter h7 = h3->next();
-
-        // VertexIter vc = newVertex();
-        v1->position = (v0->position + v1->position) / 2.0;
-        v1->halfedge() = h2;
-
-        h2->next() = h4->next();
-        h2->next()->next()->next() = h2;
-        h2->face() = h2->next()->face();
-        h5->vertex()->halfedge() = h2->next();
-
-
-        h7->next() = h6->next();
-        h7->next()->vertex() = v1;
-        h7->next()->next()->next() = h7;
-        h7->face() = h7->next()->face();
-
+        HalfedgeIter h8 = h4->next();
+        HalfedgeIter h9 = h2->twin();
+        HalfedgeIter h10 = h7->twin();
+        VertexIter v0 = h0->vertex();
+        VertexIter v1 = h1->vertex();
+        VertexIter v2 = h9->vertex();
+        VertexIter v3 = h6->vertex();
+        FaceIter f0 = h0->face();
+        FaceIter f1 = h1->face();
+        EdgeIter e2 = h5->edge();
+        EdgeIter e3 = h3->edge();
+        EdgeIter e4 = h9->edge();
+        EdgeIter e5 = h10->edge();
 
         HalfedgeIter hstop = h5;
-
         HalfedgeIter hmove = h6;
-
-        while (hmove != hstop) {
+        do {
             hmove = hmove->next();
             hmove->vertex() = v1;
             hmove = hmove->twin();
-        }
+        } while (hmove != hstop);
 
+        v1->position = (v0->position + v1->position) / 2.0;
+        v1->halfedge() = h10;
 
-        deleteVertex(v0);
-        deleteFace(f0);
-        deleteFace(f1);
-        deleteEdge(e0);
-        deleteEdge(e3);
-        deleteEdge(e2);
+        //Assign twins across deleted triangles
+        h4->twin() = h9;
+        h9->twin() = h4;
+        h10->twin() = h6;
+        h6->twin() = h10;
+        //Assign halfedges to the remaining edges
+        e4->halfedge() = h4;
+        e5->halfedge() = h6;
+        //Assign new halfedges for top & bot vertices
+        v2->halfedge() = h9;
+        v3->halfedge() = h6;
+        //For the halfedges whose edges are to be removed, assign them new edges
+        h4->edge() = e4;
+        h6->edge() = e5;
+        //Redo deletions
+        deleteVertex(v0);//
+        deleteFace(f0);//
+        deleteFace(f1);//
+        deleteEdge(e0);//
+        deleteEdge(e3);//
+        deleteEdge(e2);//
         deleteHalfedge(h0);
         deleteHalfedge(h1);
-        deleteHalfedge(h3);
-        deleteHalfedge(h4);
+        deleteHalfedge(h2);
         deleteHalfedge(h5);
-        deleteHalfedge(h6);
+        deleteHalfedge(h7);
+        deleteHalfedge(h3);
         return v1;
     }
 

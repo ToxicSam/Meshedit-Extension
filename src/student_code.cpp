@@ -116,7 +116,6 @@ namespace CGL {
         centroid = avg / (float) degree();
     }
 
-    std::vector<EdgeIter> deletedEdges;
 
 
     VertexIter HalfedgeMesh::collapseEdge( EdgeIter e0) 
@@ -174,7 +173,7 @@ namespace CGL {
  
          //cout << "Number of shared neighbors = " << neighborcount << endl;
          if (neighborcount != 2) {
-            cout << "WARNING: collapse aborted due to more than one shared neighbor vertex.";
+            // cout << "WARNING: collapse aborted due to more than one shared neighbor vertex.";
              return VertexIter();
          }
 
@@ -193,7 +192,7 @@ namespace CGL {
             Vector3D beforenormal = cross(vertexApos - v1->position, vertexBpos - v1->position);
             Vector3D afternormal = cross(vertexApos - v1newpos, vertexBpos - v1newpos);
             if (dot(beforenormal, afternormal) < 0) {
-                cout << "WARNING: collapse aborted due to a flipped triangle.";
+                // cout << "WARNING: collapse aborted due to a flipped triangle.";
                 return VertexIter();
             }
             leftmove = leftmove->next()->twin();
@@ -209,7 +208,7 @@ namespace CGL {
             Vector3D afternormal = cross(vertexApos - v1newpos, vertexBpos - v1newpos);
 
             if (dot(beforenormal, afternormal) < 0) {
-                cout << "WARNING: collapse aborted due to a flipped triangle.";
+                // cout << "WARNING: collapse aborted due to a flipped triangle.";
                 return VertexIter();
             }
             rightmove = rightmove->next()->twin();
@@ -246,9 +245,12 @@ namespace CGL {
         h6->edge() = e5;
         //Delete everything within the collapsed space
 
-        deletedEdges.push_back(e0);
-        deletedEdges.push_back(e3);
-        deletedEdges.push_back(e2);
+        // deletedEdges.push_back(e0);
+        // deletedEdges.push_back(e3);
+        // deletedEdges.push_back(e2);
+
+        // cout << "deletedEdges size = " << deletedEdges.size() << endl;
+
 
         deleteVertex(v0);//
         deleteFace(f0);//
@@ -262,6 +264,9 @@ namespace CGL {
         deleteHalfedge(h5);
         deleteHalfedge(h7);
         deleteHalfedge(h3);
+
+        // cout << "number of remaining edges = " << nEdges() << endl;
+
         // cout << "finishing collapse " << endl;
         return v1;
     }
@@ -598,27 +603,16 @@ namespace CGL {
         while (e != mesh.edgesEnd()) {
             // EdgeIter e = e1;
             if (e->length() < 4.0/5.0 * l) {
-                // cout << "about to collapse " << "\n";
-                // mesh.collapseEdge(e);
-                // cout << "re-entering remesh" << endl;
-
-                // toCollapse.push_back(e); //Tim's code
 
                 // mesh.collapseEdge(e); //Kenny's code
                 // e = mesh.edgesBegin(); 
 
-                // if (std::find(deletedEdges.begin(), deletedEdges.end(), e) != deletedEdges.end()) {
-                //     // Found e in deleted edges, therefore must advance until safe
-                // }
-
-
-
-                while (std::find(deletedEdges.begin(), deletedEdges.end(), e) != deletedEdges.end()) {
-                    cout << "found a deleted edge" << endl;
-                    e++;
-                }
+                Size nEdgesBefore = mesh.nEdges();
                 mesh.collapseEdge(e);
-                     
+                Size nEdgesAfter = mesh.nEdges();
+                if (nEdgesBefore != nEdgesAfter) { //we're done with this edge, set it back to the beginning
+                    e = mesh.edgesBegin();
+                }
 
             }
             // advance(e, rand() % mesh.nEdges() + 0); //advance the iterator by 1+ or more
@@ -627,13 +621,6 @@ namespace CGL {
             // cout << "difference between e1 and begin " << std::distance(mesh.edgesBegin(), e1) << "\n";
             // cout << "difference between end and begin " << std::distance(mesh.edgesBegin(), mesh.edgesEnd()) << "\n";
         }
-        // cout << "forever 4 " << endl;
-        // for (EdgeIter e : toCollapse) {
-        //     if (mesh.containsEdge(e)) {
-        //         cout << "about to collapse " << "\n";
-        //         mesh.collapseEdge(e);
-        //     }
-        // }
 
     
         // Flip edges for variance improvement

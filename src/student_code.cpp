@@ -153,6 +153,7 @@ namespace CGL {
         cout << "forever 7" << endl;
              HalfedgeCIter chtwin = ch->twin();
              VertexCIter cneighbor = chtwin->vertex();
+             int count = 0;
              do {
         cout << "forever 8" << endl;
                  HalfedgeCIter dhtwin = dh->twin();
@@ -223,7 +224,7 @@ namespace CGL {
         } while (hmove != hstop);
 
         //Assign new position and halfedge to the shifted v1
-        v1->position = v1newpos;
+        v1->position = (v0->position + v1->position) / 2.0;
         v1->halfedge() = h10;
         //Assign twins across deleted triangles
         h4->twin() = h9;
@@ -240,30 +241,19 @@ namespace CGL {
         h4->edge() = e4;
         h6->edge() = e5;
         //Delete everything within the collapsed space
-        cout << "deleteVertex(v0)" << endl;
         deleteVertex(v0);//
-        cout << "delete face f0 " << endl;
         deleteFace(f0);//
-        cout << "delete face f1" << endl;
         deleteFace(f1);//
-        cout << "delete edge e0" << endl;
         deleteEdge(e0);//
-        cout << "delete edge e3" << endl;
         deleteEdge(e3);//
-        cout << "delete edge e2" << endl;
         deleteEdge(e2);//
-        cout << "delete half edge h0" << endl;
         deleteHalfedge(h0);
-        cout << "delete half edge h1" << endl;
         deleteHalfedge(h1);
-        cout << "delete half edge h2" << endl;
         deleteHalfedge(h2);
-        cout << "delete half edge h5" << endl;
         deleteHalfedge(h5);
-        cout << "delete half edge h7" << endl;
         deleteHalfedge(h7);
-        cout << "delete half edge h3" << endl;
         deleteHalfedge(h3);
+        cout << "finishing collapse " << endl;
         return v1;
     }
 
@@ -520,17 +510,21 @@ namespace CGL {
             EdgeIter e = e1;
             e1++;
             if (e->length() < 4.0/5.0 * l) {
-                cout << "about to collapse " << "\n";
-                mesh.collapseEdge(e);
+                // cout << "about to collapse " << "\n";
+                // mesh.collapseEdge(e);
+                // cout << "re-entering remesh" << endl;
                 toCollapse.push_back(e);
             }
+
             // cout << "difference between e1 and begin " << std::distance(mesh.edgesBegin(), e1) << "\n";
             // cout << "difference between end and begin " << std::distance(mesh.edgesBegin(), mesh.edgesEnd()) << "\n";
         }
         // cout << "forever 4 " << endl;
         for (EdgeIter e : toCollapse) {
-            // cout << "about to collapse " << "\n";
-            // mesh.collapseEdge(e);
+            if (mesh.containsEdge(e)) {
+                cout << "about to collapse " << "\n";
+                mesh.collapseEdge(e);
+            }
         }
 
     
@@ -558,5 +552,6 @@ namespace CGL {
                 v->position = v->position + weight * (dir - dot(v->normal(), dir) * v->normal());
             }
         }
+        cout << "finished remeshing " << endl;
     }
 }

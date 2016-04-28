@@ -117,6 +117,9 @@ namespace CGL {
         centroid = avg / (float) degree();
     }
 
+    std::vector<EdgeIter> deletedEdges;
+
+
     VertexIter HalfedgeMesh::collapseEdge( EdgeIter e0) 
     {
         // TODO This method should collapse the given edge and return an iterator to the new vertex created by the collapse
@@ -144,7 +147,9 @@ namespace CGL {
         EdgeIter e3 = h3->edge();
         EdgeIter e4 = h9->edge();
         EdgeIter e5 = h10->edge();
+
         /////////////////Number of neighbors check START/////////////////
+
         HalfedgeCIter ch = e0->halfedge();
         HalfedgeCIter dh = e0->halfedge()->twin();
         int neighborcount = 0;
@@ -171,6 +176,7 @@ namespace CGL {
             cout << "WARNING: collapse aborted due to more than one shared neighbor vertex.";
              return VertexIter();
          }
+
         /////////////////Number of neighbors check END/////////////////
 
         /////////////////Triangle flip check START/////////////////
@@ -241,6 +247,11 @@ namespace CGL {
         h4->edge() = e4;
         h6->edge() = e5;
         //Delete everything within the collapsed space
+
+        deletedEdges.push_back(e0);
+        deletedEdges.push_back(e3);
+        deletedEdges.push_back(e2);
+
         deleteVertex(v0);//
         deleteFace(f0);//
         deleteFace(f1);//
@@ -253,10 +264,9 @@ namespace CGL {
         deleteHalfedge(h5);
         deleteHalfedge(h7);
         deleteHalfedge(h3);
-        cout << "finishing collapse " << endl;
+        // cout << "finishing collapse " << endl;
         return v1;
     }
-
 
 
 
@@ -488,7 +498,8 @@ namespace CGL {
     }
 
     void MeshResampler::remesh(HalfedgeMesh& mesh) {
-        cout << "remeshing" << "\n";
+
+        cout << "Remeshing..." << "\n";
         double l = 0.0;
         int count = 0;
         // Calculate average edge length
@@ -505,27 +516,46 @@ namespace CGL {
             }
         }
 
-        EdgeIter e1 = mesh.edgesBegin();
-        while (e1 != mesh.edgesEnd()) {
-            EdgeIter e = e1;
-            e1++;
+        EdgeIter e = mesh.edgesBegin(); 
+        while (e != mesh.edgesEnd()) {
+            // EdgeIter e = e1;
             if (e->length() < 4.0/5.0 * l) {
                 // cout << "about to collapse " << "\n";
                 // mesh.collapseEdge(e);
                 // cout << "re-entering remesh" << endl;
-                toCollapse.push_back(e);
+
+                // toCollapse.push_back(e); //Tim's code
+
+                // mesh.collapseEdge(e); //Kenny's code
+                // e = mesh.edgesBegin(); 
+
+                // if (std::find(deletedEdges.begin(), deletedEdges.end(), e) != deletedEdges.end()) {
+                //     // Found e in deleted edges, therefore must advance until safe
+                // }
+
+
+
+                while (std::find(deletedEdges.begin(), deletedEdges.end(), e) != deletedEdges.end()) {
+                    cout << "found a deleted edge" << endl;
+                    e++;
+                }
+                mesh.collapseEdge(e);
+                     
+
             }
+            // advance(e, rand() % mesh.nEdges() + 0); //advance the iterator by 1+ or more
+            e++;
 
             // cout << "difference between e1 and begin " << std::distance(mesh.edgesBegin(), e1) << "\n";
             // cout << "difference between end and begin " << std::distance(mesh.edgesBegin(), mesh.edgesEnd()) << "\n";
         }
         // cout << "forever 4 " << endl;
-        for (EdgeIter e : toCollapse) {
-            if (mesh.containsEdge(e)) {
-                cout << "about to collapse " << "\n";
-                mesh.collapseEdge(e);
-            }
-        }
+        // for (EdgeIter e : toCollapse) {
+        //     if (mesh.containsEdge(e)) {
+        //         cout << "about to collapse " << "\n";
+        //         mesh.collapseEdge(e);
+        //     }
+        // }
 
     
         // Flip edges for variance improvement
@@ -552,6 +582,6 @@ namespace CGL {
                 v->position = v->position + weight * (dir - dot(v->normal(), dir) * v->normal());
             }
         }
-        cout << "finished remeshing " << endl;
+        cout << "Finished remeshing." << endl;
     }
 }

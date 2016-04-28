@@ -153,6 +153,7 @@ namespace CGL {
         cout << "forever 7" << endl;
              HalfedgeCIter chtwin = ch->twin();
              VertexCIter cneighbor = chtwin->vertex();
+             int count = 0;
              do {
         cout << "forever 8" << endl;
                  HalfedgeCIter dhtwin = dh->twin();
@@ -223,7 +224,7 @@ namespace CGL {
         } while (hmove != hstop);
 
         //Assign new position and halfedge to the shifted v1
-        v1->position = v1newpos;
+        v1->position = (v0->position + v1->position) / 2.0;
         v1->halfedge() = h10;
         //Assign twins across deleted triangles
         h4->twin() = h9;
@@ -252,6 +253,7 @@ namespace CGL {
         deleteHalfedge(h5);
         deleteHalfedge(h7);
         deleteHalfedge(h3);
+        cout << "finishing collapse " << endl;
         return v1;
     }
 
@@ -509,16 +511,20 @@ namespace CGL {
             e1++;
             if (e->length() < 4.0/5.0 * l) {
                 cout << "about to collapse " << "\n";
-                mesh.collapseEdge(e);
+                // mesh.collapseEdge(e);
+                cout << "re-entering remesh" << endl;
                 toCollapse.push_back(e);
             }
-            cout << "difference between e1 and begin " << std::distance(mesh.edgesBegin(), e1) << "\n";
-            cout << "difference between end and begin " << std::distance(mesh.edgesBegin(), mesh.edgesEnd()) << "\n";
+            // cout << "flkdsja" << endl; 
+            // cout << "difference between e1 and begin " << std::distance(mesh.edgesBegin(), e1) << "\n";
+            // cout << "difference between end and begin " << std::distance(mesh.edgesBegin(), mesh.edgesEnd()) << "\n";
         }
         // cout << "forever 4 " << endl;
         for (EdgeIter e : toCollapse) {
-            // cout << "about to collapse " << "\n";
-            // mesh.collapseEdge(e);
+            if (mesh.containsEdge(e)) {
+                cout << "about to collapse " << "\n";
+                mesh.collapseEdge(e);
+            }
         }
 
     
@@ -546,5 +552,6 @@ namespace CGL {
                 v->position = v->position + weight * (dir - dot(v->normal(), dir) * v->normal());
             }
         }
+        cout << "finished remeshing " << endl;
     }
 }

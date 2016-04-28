@@ -510,9 +510,9 @@ namespace CGL {
             EdgeIter e = e1;
             e1++;
             if (e->length() < 4.0/5.0 * l) {
-                cout << "about to collapse " << "\n";
+                // cout << "about to collapse " << "\n";
                 // mesh.collapseEdge(e);
-                cout << "re-entering remesh" << endl;
+                // cout << "re-entering remesh" << endl;
                 toCollapse.push_back(e);
             }
             // cout << "flkdsja" << endl; 

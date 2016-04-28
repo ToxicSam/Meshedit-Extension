@@ -231,6 +231,10 @@ namespace CGL {
             case 'X':
                 mesh_remesh();
                 break;
+            case 'z':
+            case 'Z':
+                mesh_simplify();
+                break;
             case 'i':
             case 'I':
                 showHUD = !showHUD;
@@ -932,6 +936,21 @@ namespace CGL {
         }
 
         resampler.remesh(*mesh);
+
+        selectedFeature.invalidate();
+        hoveredFeature.invalidate();
+    }
+
+    void MeshEdit::mesh_simplify() {
+        HalfedgeMesh* mesh;
+
+        if (selectedFeature.isValid()) {
+            mesh = &(selectedFeature.node->mesh);
+        } else {
+            mesh = &(meshNodes.begin()->mesh);
+        }
+
+        resampler.simplify(*mesh);
 
         selectedFeature.invalidate();
         hoveredFeature.invalidate();

@@ -101,7 +101,6 @@ namespace CGL {
         return n.unit();
     }
 
-
     void Vertex::computeCentroid(void) {
         Vector3D avg = Vector3D();
         HalfedgeCIter h = halfedge(); 
@@ -123,6 +122,8 @@ namespace CGL {
     VertexIter HalfedgeMesh::collapseEdge( EdgeIter e0) 
     {
         // TODO This method should collapse the given edge and return an iterator to the new vertex created by the collapse
+        
+
         if (e0->isBoundary()) {
             return VertexIter();
         }
@@ -155,12 +156,12 @@ namespace CGL {
         int neighborcount = 0;
         int loopcount = 0;
          do {
-        cout << "forever 7" << endl;
+        //cout << "forever 7" << endl;
              HalfedgeCIter chtwin = ch->twin();
              VertexCIter cneighbor = chtwin->vertex();
              int count = 0;
              do {
-        cout << "forever 8" << endl;
+        //cout << "forever 8" << endl;
                  HalfedgeCIter dhtwin = dh->twin();
                  VertexCIter vneighbor = dhtwin->vertex();
                  if (cneighbor == vneighbor) {
@@ -171,7 +172,7 @@ namespace CGL {
              ch = chtwin->next();
          } while (ch != e0->halfedge());
  
-         cout << "Number of shared neighbors = " << neighborcount << endl;
+         //cout << "Number of shared neighbors = " << neighborcount << endl;
          if (neighborcount != 2) {
             cout << "WARNING: collapse aborted due to more than one shared neighbor vertex.";
              return VertexIter();
@@ -186,7 +187,7 @@ namespace CGL {
         HalfedgeCIter leftmove = h9;
         HalfedgeCIter leftstop = h7;
         do {
-        cout << "forever 9" << endl;
+        //cout << "forever 9" << endl;
             Vector3D vertexApos = leftmove->vertex()->position;
             Vector3D vertexBpos = leftmove->next()->next()->vertex()->position;
             Vector3D beforenormal = cross(vertexApos - v1->position, vertexBpos - v1->position);
@@ -202,7 +203,6 @@ namespace CGL {
         HalfedgeCIter rightmove = h6;
         HalfedgeCIter rightstop = h5;
         do {
-        cout << "forever 10" << endl;
             Vector3D vertexApos = rightmove->vertex()->position;
             Vector3D vertexBpos = rightmove->next()->next()->vertex()->position;
             Vector3D beforenormal = cross(vertexApos - v0->position, vertexBpos - v0->position);
@@ -220,13 +220,11 @@ namespace CGL {
         HalfedgeIter hstop = h5;
         HalfedgeIter hmove = h6;
         do {
-        cout << "forever 7" << endl;
             hmove = hmove->next();
             hmove->vertex() = v1;
             hmove = hmove->twin();
-            cout << "forever 3 " << "\n";
-            cout << &*hmove << endl;
-            cout << &*hstop << endl;
+            //cout << &*hmove << endl;
+            //cout << &*hstop << endl;
         } while (hmove != hstop);
 
         //Assign new position and halfedge to the shifted v1
@@ -496,10 +494,90 @@ namespace CGL {
             v->position = v->newPosition;
         }
     }
+    void MeshResampler::simplify(HalfedgeMesh& mesh) {
+        MutablePriorityQueue<EdgeRecord> queue;
+        //Step 1: Compute a quadric for each face
+        int tcount = 0;
+        
+        for (FaceIter f = mesh.facesBegin(); f != mesh.facesEnd(); f++) {
+            Vector3D N = f->normal();
+            double d = dot(-N, f->halfedge()->vertex()->position);
+            Vector4D v = Vector4D(N.x, N.y, N.z, d);
+            f->quadric = outer(v, v);
+            tcount += 1;
+        }
+        printf("%d\n", tcount);
+        //Step 2: Compute a quadric for each vertex
+        for (VertexIter v = mesh.verticesBegin(); v != mesh.verticesEnd(); v++) {
+            v->computeQuadric();
+        }
+        //Step 3: For each edge, create an EdgeRecord and insert it into one global MutablePriorityQueue
+        for (EdgeIter e = mesh.edgesBegin(); e != mesh.edgesEnd(); e++) {
+            EdgeRecord myRecord(e); //ASK ABOUT HOW TO ADD/REMOVE FROM QUEUE
+            queue.insert(e);
+        }
+
+        while (mesh.nFaces() >= tcount * 0.25) {
+            printf("%lu\n", mesh.nFaces());
+            //Find and remove the cheapest edge from the queue
+            EdgeRecord bestEdge = queue.top();
+            queue.pop();
+            //Compute the new Quadric by summing the quadric at its two endpoints
+            VertexIter v0 = bestEdge.edge->halfedge()->vertex();
+            VertexIter v1 = bestEdge.edge->halfedge()->twin()->vertex();
+            Matrix4x4 newQuadric = v0->quadric + v1->quadric;
+
+            //Remove any edge touching either of its endpoints from the queue
+            
+            //v0
+            HalfedgeIter h0 = v0->halfedge(); 
+            h0 = h0->twin(); 
+
+            HalfedgeIter horig0 = h0;
+            do {
+                EdgeIter e0 = h0->edge();
+                EdgeRecord EdgeRecord(e0);
+                queue.remove(e0);
+                h0 = h0->next();
+                h0 = h0->twin();
+            } while (h0 != horig0);
+
+            //v1
+            HalfedgeIter h1 = v1->halfedge(); 
+            h1 = h1->twin(); 
+
+            HalfedgeIter horig1 = h1;
+            do {
+                EdgeRecord myRecord(h1->edge());
+                queue.remove(h1->edge());
+                h1 = h1->next();
+                h1 = h1->twin();
+            } while (h1 != horig1);
+
+            //Collapse the edge and set the quadric of the new vertex to the new quadric computed above.
+            VertexIter newVertex = mesh.collapseEdge(bestEdge.edge);
+            //VertexIter newVertex = VertexIter();
+            newVertex->quadric = newQuadric;
+
+            //Insert any edge touching the new vertex into the queue, creating new edge records for each of them
+            HalfedgeIter h2 = newVertex->halfedge(); 
+            h2 = h2->twin(); 
+            printf("%s\n", "here1");
+            HalfedgeIter horig2 = h2;
+            do {
+                EdgeRecord myRecord(h2->edge());
+                queue.insert(h2->edge());
+                h2 = h2->next();
+                h2 = h2->twin();
+            } while (h2 != horig2);
+            printf("%s\n", "here2");
+        }       
+    }
 
     void MeshResampler::remesh(HalfedgeMesh& mesh) {
 
         cout << "Remeshing..." << "\n";
+
         double l = 0.0;
         int count = 0;
         // Calculate average edge length

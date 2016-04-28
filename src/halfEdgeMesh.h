@@ -508,6 +508,7 @@ namespace CGL {
          * computes the average of the neighboring vertex positions and stores it in Vertex::centroid
          */
         void computeCentroid(void);
+        void computeQuadric(void);
 
         Vector3D centroid; ///< average of neighbor positions, storing the value computed by Vertex::computeCentroid()
 

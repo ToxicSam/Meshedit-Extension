@@ -2,6 +2,61 @@
 
 namespace CGL {
 
+    EdgeRecord::EdgeRecord(EdgeIter& e) {
+        //Step 1: Obtain endpoints of edge
+        HalfedgeIter h0 = e->halfedge();
+        HalfedgeIter h1 = h0->twin();
+        VertexIter v0 = h0->vertex();
+        VertexIter v1 = h1->vertex();
+        // v0->computeQuadric();
+        // v1->computeQuadric();
+        //Step 2: Compute Quadric K
+        Matrix4x4 K = v0->quadric + v1->quadric;
+
+        //Step 3: Solve for Matrix A
+        Matrix3x3 A;
+        A(0,0) = K(0,0);
+        A(0,1) = K(0,1);
+        A(0,2) = K(0,2);
+        A(1,0) = K(1,0);
+        A(1,1) = K(1,1);
+        A(1,2) = K(1,2);
+        A(2,0) = K(2,0);
+        A(2,1) = K(2,1);
+        A(2,2) = K(2,2);
+
+        //Step 4: Solve for Vector b
+        Vector3D b;
+        b.x = -1.0 * K(3,0);
+        b.y = -1.0 * K(3,1);
+        b.z = -1.0 * K(3,2);
+
+        //Step 5: Solve for optimal point and store in EdgeRecord::optimalPoint
+        optimalPoint = A.inv() * b;
+
+        //Step 6: Compute the corresponding error value and store it in EdgeRecord::score ??????? ASK ABOUT calculating x
+        Vector4D x = Vector4D(optimalPoint.x, optimalPoint.y, optimalPoint.z, 1);
+        Vector4D Kx = K * x;
+        score = dot(x, Kx);
+
+        //Step 7: Store the corresponding edge in EdgeRecord::edge
+        edge = e;
+    }
+
+    void Vertex::computeQuadric(void) {
+        HalfedgeCIter h = halfedge(); 
+        h = h->twin(); 
+
+        HalfedgeCIter horig = h;
+        Matrix4x4 q0;
+        do {
+            q0 += h->face()->quadric;
+            h = h->next();
+            h = h->twin();
+        } while (h != horig);
+        quadric = q0;
+    }
+
     bool Halfedge::isBoundary(void) const
     // returns true if and only if this halfedge is on the boundary
     {

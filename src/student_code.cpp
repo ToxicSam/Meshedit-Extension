@@ -198,7 +198,6 @@ namespace CGL {
         HalfedgeCIter rightmove = h6;
         HalfedgeCIter rightstop = h5;
         do {
-        cout << "forever 10" << endl;
             Vector3D vertexApos = rightmove->vertex()->position;
             Vector3D vertexBpos = rightmove->next()->next()->vertex()->position;
             Vector3D beforenormal = cross(vertexApos - v0->position, vertexBpos - v0->position);
@@ -216,11 +215,9 @@ namespace CGL {
         HalfedgeIter hstop = h5;
         HalfedgeIter hmove = h6;
         do {
-        cout << "forever 7" << endl;
             hmove = hmove->next();
             hmove->vertex() = v1;
             hmove = hmove->twin();
-            cout << "forever 3 " << "\n";
             cout << &*hmove << endl;
             cout << &*hstop << endl;
         } while (hmove != hstop);

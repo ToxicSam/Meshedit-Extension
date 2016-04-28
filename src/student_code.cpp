@@ -120,6 +120,8 @@ namespace CGL {
      VertexIter HalfedgeMesh::collapseEdge( EdgeIter e0) 
     {
         // TODO This method should collapse the given edge and return an iterator to the new vertex created by the collapse
+        
+
         if (e0->isBoundary()) {
             return VertexIter();
         }
@@ -554,7 +556,6 @@ namespace CGL {
     }
 
     void MeshResampler::remesh(HalfedgeMesh& mesh) {
-        cout << "remeshing" << "\n";
         double l = 0.0;
         int count = 0;
         // Calculate average edge length

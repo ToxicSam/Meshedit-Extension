@@ -485,6 +485,9 @@ namespace CGL {
             v->position = v->newPosition;
         }
     }
+    void MeshResampler::simplify(HalfedgeMesh& mesh) {
+        printf("%s\n", "simplify");
+    }
 
     void MeshResampler::remesh(HalfedgeMesh& mesh) {
         double l = 0.0;

@@ -139,6 +139,7 @@
 #ifndef CGL_HALFEDGEMESH_H
 #define CGL_HALFEDGEMESH_H
 
+#include <algorithm>
 #include <set>
 #include <map>
 #include <list>
@@ -860,6 +861,16 @@ namespace CGL {
                     << elementAddress(he) << endl;
             }
         }
+
+        bool containsEdge(EdgeIter e) {
+            for (EdgeIter e1 = edges.begin(); e1 != edges.end(); e1++) {
+                if (e1 == e) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        
     protected:
 
         /**

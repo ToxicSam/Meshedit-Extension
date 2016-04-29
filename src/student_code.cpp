@@ -116,6 +116,8 @@ namespace CGL {
         centroid = avg / (float) degree();
     }
 
+
+
     VertexIter HalfedgeMesh::collapseEdge( EdgeIter e0) 
     {
         // TODO This method should collapse the given edge and return an iterator to the new vertex created by the collapse
@@ -125,7 +127,7 @@ namespace CGL {
             return VertexIter();
         }
         HalfedgeIter h0 = e0->halfedge();
-        printf("%s\n", "here1");
+
         HalfedgeIter h1 = h0->twin();
         HalfedgeIter h2 = h0->next();
         HalfedgeIter h3 = h1->next();
@@ -136,7 +138,7 @@ namespace CGL {
         HalfedgeIter h8 = h4->next();
         HalfedgeIter h9 = h2->twin();
         HalfedgeIter h10 = h7->twin();
-        printf("%s\n", "here2");
+
         VertexIter v0 = h0->vertex();
         VertexIter v1 = h1->vertex();
         VertexIter v2 = h9->vertex();
@@ -147,8 +149,9 @@ namespace CGL {
         EdgeIter e3 = h3->edge();
         EdgeIter e4 = h9->edge();
         EdgeIter e5 = h10->edge();
-        printf("%s\n", "here3");
+
         /////////////////Number of neighbors check START/////////////////
+
         HalfedgeCIter ch = e0->halfedge();
         HalfedgeCIter dh = e0->halfedge()->twin();
         int neighborcount = 0;
@@ -159,7 +162,7 @@ namespace CGL {
              VertexCIter cneighbor = chtwin->vertex();
              int count = 0;
              do {
-        cout << "forever 8" << endl;
+        //cout << "forever 8" << endl;
                  HalfedgeCIter dhtwin = dh->twin();
                  VertexCIter vneighbor = dhtwin->vertex();
                  if (cneighbor == vneighbor) {
@@ -172,9 +175,10 @@ namespace CGL {
  
          //cout << "Number of shared neighbors = " << neighborcount << endl;
          if (neighborcount != 2) {
-            cout << "WARNING: collapse aborted due to more than one shared neighbor vertex.";
+            //cout << "WARNING: collapse aborted due to more than one shared neighbor vertex.";
              return VertexIter();
          }
+
         /////////////////Number of neighbors check END/////////////////
 
         /////////////////Triangle flip check START/////////////////
@@ -190,7 +194,7 @@ namespace CGL {
             Vector3D beforenormal = cross(vertexApos - v1->position, vertexBpos - v1->position);
             Vector3D afternormal = cross(vertexApos - v1newpos, vertexBpos - v1newpos);
             if (dot(beforenormal, afternormal) < 0) {
-                cout << "WARNING: collapse aborted due to a flipped triangle.";
+                // cout << "WARNING: collapse aborted due to a flipped triangle.";
                 return VertexIter();
             }
             leftmove = leftmove->next()->twin();
@@ -206,7 +210,7 @@ namespace CGL {
             Vector3D afternormal = cross(vertexApos - v1newpos, vertexBpos - v1newpos);
 
             if (dot(beforenormal, afternormal) < 0) {
-                cout << "WARNING: collapse aborted due to a flipped triangle.";
+                // cout << "WARNING: collapse aborted due to a flipped triangle.";
                 return VertexIter();
             }
             rightmove = rightmove->next()->twin();
@@ -242,6 +246,14 @@ namespace CGL {
         h4->edge() = e4;
         h6->edge() = e5;
         //Delete everything within the collapsed space
+
+        // deletedEdges.push_back(e0);
+        // deletedEdges.push_back(e3);
+        // deletedEdges.push_back(e2);
+
+        // cout << "deletedEdges size = " << deletedEdges.size() << endl;
+
+
         deleteVertex(v0);//
         deleteFace(f0);//
         deleteFace(f1);//
@@ -254,10 +266,12 @@ namespace CGL {
         deleteHalfedge(h5);
         deleteHalfedge(h7);
         deleteHalfedge(h3);
-        cout << "finishing collapse " << endl;
+
+        // cout << "number of remaining edges = " << nEdges() << endl;
+
+        // cout << "finishing collapse " << endl;
         return v1;
     }
-
 
 
 
@@ -499,7 +513,7 @@ namespace CGL {
             f->quadric = outer(v, v);
             tcount += 1;
         }
-        printf("%d\n", tcount);
+        //printf("%d\n", tcount);
         //Step 2: Compute a quadric for each vertex
         for (VertexIter v = mesh.verticesBegin(); v != mesh.verticesEnd(); v++) {
             v->computeQuadric();
@@ -511,7 +525,7 @@ namespace CGL {
         }
 
         while (mesh.nFaces() >= tcount * 0.25) {
-            printf("%lu\n", mesh.nFaces());
+            //printf("%lu\n", mesh.nFaces());
             //Find and remove the cheapest edge from the queue
             EdgeRecord bestEdge = queue.top();
             queue.pop();
@@ -548,14 +562,18 @@ namespace CGL {
             } while (h1 != horig1);
 
             //Collapse the edge and set the quadric of the new vertex to the new quadric computed above.
+            Size beforeEdges = mesh.nEdges();
             VertexIter newVertex = mesh.collapseEdge(bestEdge.edge);
+            Size afterEdges = mesh.nEdges();
             //VertexIter newVertex = VertexIter();
+            if (beforeEdges == afterEdges) {
+                continue;
+            }
             newVertex->quadric = newQuadric;
 
             //Insert any edge touching the new vertex into the queue, creating new edge records for each of them
             HalfedgeIter h2 = newVertex->halfedge(); 
             h2 = h2->twin(); 
-            printf("%s\n", "here1");
             HalfedgeIter horig2 = h2;
             do {
                 EdgeRecord myRecord(h2->edge());
@@ -563,12 +581,11 @@ namespace CGL {
                 h2 = h2->next();
                 h2 = h2->twin();
             } while (h2 != horig2);
-            printf("%s\n", "here2");
+            //printf("%s\n", "here2");
         }       
     }
 
     void MeshResampler::remesh(HalfedgeMesh& mesh) {
-        cout << "remeshing" << "\n";
         double l = 0.0;
         int count = 0;
         // Calculate average edge length
@@ -585,26 +602,28 @@ namespace CGL {
             }
         }
 
-        EdgeIter e1 = mesh.edgesBegin();
-        while (e1 != mesh.edgesEnd()) {
-            EdgeIter e = e1;
-            e1++;
+        EdgeIter e = mesh.edgesBegin(); 
+        while (e != mesh.edgesEnd()) {
+            // EdgeIter e = e1;
             if (e->length() < 4.0/5.0 * l) {
-                cout << "about to collapse " << "\n";
-                // mesh.collapseEdge(e);
-                cout << "re-entering remesh" << endl;
-                toCollapse.push_back(e);
+
+
+                // mesh.collapseEdge(e); //Kenny's code
+                // e = mesh.edgesBegin(); 
+
+                Size nEdgesBefore = mesh.nEdges();
+                mesh.collapseEdge(e);
+                Size nEdgesAfter = mesh.nEdges();
+                if (nEdgesBefore != nEdgesAfter) { //we're done with this edge, set it back to the beginning
+                    e = mesh.edgesBegin();
+                }
+
             }
-            // cout << "flkdsja" << endl; 
+            // advance(e, rand() % mesh.nEdges() + 0); //advance the iterator by 1+ or more
+            e++;
+
             // cout << "difference between e1 and begin " << std::distance(mesh.edgesBegin(), e1) << "\n";
             // cout << "difference between end and begin " << std::distance(mesh.edgesBegin(), mesh.edgesEnd()) << "\n";
-        }
-        // cout << "forever 4 " << endl;
-        for (EdgeIter e : toCollapse) {
-            if (mesh.containsEdge(e)) {
-                cout << "about to collapse " << "\n";
-                mesh.collapseEdge(e);
-            }
         }
 
     
@@ -632,6 +651,6 @@ namespace CGL {
                 v->position = v->position + weight * (dir - dot(v->normal(), dir) * v->normal());
             }
         }
-        cout << "finished remeshing " << endl;
+        cout << "Finished remeshing." << endl;
     }
 }

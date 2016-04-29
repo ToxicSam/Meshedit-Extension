@@ -600,6 +600,9 @@ namespace CGL {
     class HalfedgeMesh {
     public:
 
+        std::vector<EdgeIter> deletedEdges;
+
+
         /**
          * Constructor.
          */

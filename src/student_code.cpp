@@ -125,6 +125,7 @@ namespace CGL {
             return VertexIter();
         }
         HalfedgeIter h0 = e0->halfedge();
+        printf("%s\n", "here1");
         HalfedgeIter h1 = h0->twin();
         HalfedgeIter h2 = h0->next();
         HalfedgeIter h3 = h1->next();
@@ -135,6 +136,7 @@ namespace CGL {
         HalfedgeIter h8 = h4->next();
         HalfedgeIter h9 = h2->twin();
         HalfedgeIter h10 = h7->twin();
+        printf("%s\n", "here2");
         VertexIter v0 = h0->vertex();
         VertexIter v1 = h1->vertex();
         VertexIter v2 = h9->vertex();
@@ -145,6 +147,7 @@ namespace CGL {
         EdgeIter e3 = h3->edge();
         EdgeIter e4 = h9->edge();
         EdgeIter e5 = h10->edge();
+        printf("%s\n", "here3");
         /////////////////Number of neighbors check START/////////////////
         HalfedgeCIter ch = e0->halfedge();
         HalfedgeCIter dh = e0->halfedge()->twin();
@@ -156,7 +159,7 @@ namespace CGL {
              VertexCIter cneighbor = chtwin->vertex();
              int count = 0;
              do {
-        //cout << "forever 8" << endl;
+        cout << "forever 8" << endl;
                  HalfedgeCIter dhtwin = dh->twin();
                  VertexCIter vneighbor = dhtwin->vertex();
                  if (cneighbor == vneighbor) {
@@ -565,6 +568,7 @@ namespace CGL {
     }
 
     void MeshResampler::remesh(HalfedgeMesh& mesh) {
+        cout << "remeshing" << "\n";
         double l = 0.0;
         int count = 0;
         // Calculate average edge length
@@ -586,9 +590,9 @@ namespace CGL {
             EdgeIter e = e1;
             e1++;
             if (e->length() < 4.0/5.0 * l) {
-                // cout << "about to collapse " << "\n";
+                cout << "about to collapse " << "\n";
                 // mesh.collapseEdge(e);
-                // cout << "re-entering remesh" << endl;
+                cout << "re-entering remesh" << endl;
                 toCollapse.push_back(e);
             }
             // cout << "flkdsja" << endl; 

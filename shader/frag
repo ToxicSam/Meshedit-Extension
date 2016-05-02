@@ -4,6 +4,7 @@ uniform vec3 eyePos;
 varying vec3 normal;
 varying vec3 vertex;
 
+
 #define PI 3.1415926
 
 vec3 shadeDiffuseFromEye();
@@ -13,6 +14,8 @@ vec3 shadePhong(vec3 lightPos);
 vec3 shadePhongAmerican(vec3 lightPos);
 
 vec3 shadeEnvmapReflection();
+
+vec4 toonify();
 
 void main()
 {
@@ -34,6 +37,11 @@ void main()
     if(outputID == 3)
     {
         gl_FragColor = vec4(shadePhongAmerican(vec3(10, 10, 10)), 1.0);
+        return;
+    }
+    if(outputID == 4)
+    {
+        gl_FragColor = toonify();
         return;
     }
     // ...
@@ -122,3 +130,32 @@ vec3 shadeEnvmapReflection()
     
     return vec3(texcolor.x, texcolor.y, texcolor.z);
 }
+
+vec4 toonify() {
+
+    vec4 color;
+    
+    vec3 n = normalize(normal);
+    vec3 i = normalize(eyePos - vertex);
+
+    vec3 o = 2.0 * (dot(i, n)) * n - i;
+
+    float theta = atan(o.y / o.x);
+    float phi = atan(pow(pow(o.x, 2.0) + pow(o.y, 2.0),.50)/o.z);
+
+    float u = theta / (2.0 * PI);
+    float v = phi / PI;
+    
+    float intensity = dot(i, n);
+
+    if (intensity > 0.98)
+        color = vec4(0.8,0.8,0.8,1.0);
+    else if (intensity > 0.5)
+        color = vec4(0.4,0.4,0.8,1.0);  
+    else if (intensity > 0.25)
+        color = vec4(0.2,0.2,0.4,1.0);
+    else
+        color = vec4(0.1,0.1,0.1,1.0);      
+    
+    return(color);
+    }

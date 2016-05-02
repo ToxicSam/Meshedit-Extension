@@ -18,6 +18,7 @@ namespace CGL {
         }
 
         void upsample(HalfedgeMesh& mesh);
+        void sqrt3(HalfedgeMesh& mesh);
         void remesh(HalfedgeMesh& mesh);
         void simplify(HalfedgeMesh& mesh);
     };

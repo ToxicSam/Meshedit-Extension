@@ -227,6 +227,9 @@ namespace CGL {
             case 'U':
                 mesh_up_sample();
                 break;
+            case '3':
+                mesh_sqrt3();
+                break;
             case 'x':
             case 'X':
                 mesh_remesh();
@@ -926,6 +929,25 @@ namespace CGL {
         selectedFeature.invalidate();
         hoveredFeature.invalidate();
     }
+    void MeshEdit::mesh_sqrt3() {
+        HalfedgeMesh* mesh;
+
+        // If an element is selected, resample the mesh containing that
+        // element; otherwise, resample the first mesh in the scene.
+        if (selectedFeature.isValid()) {
+            mesh = &(selectedFeature.node->mesh);
+        } else {
+            mesh = &(meshNodes.begin()->mesh);
+        }
+
+        resampler.sqrt3(*mesh);
+
+        // Since the mesh may have changed, the selected and
+        // hovered features may no longer point to valid elements.
+        selectedFeature.invalidate();
+        hoveredFeature.invalidate();
+    }
+
     void MeshEdit::mesh_remesh() {
         HalfedgeMesh* mesh;
 

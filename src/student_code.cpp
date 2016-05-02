@@ -383,6 +383,92 @@ namespace CGL {
         return v4;
     }
 
+    void MeshResampler::sqrt3(HalfedgeMesh& mesh) {
+       std::vector<FaceIter> faces; 
+       for (FaceIter f = mesh.facesBegin(); f != mesh.facesEnd(); f++) {
+        faces.push_back(f);
+       }
+
+       for (FaceIter f : faces) {
+        HalfedgeIter h0 = f->halfedge();
+        HalfedgeIter h1 = h0->next();
+        HalfedgeIter h2 = h1->next();
+
+        VertexIter v0 = h0->vertex();
+        VertexIter v1 = h1->vertex();
+        VertexIter v2 = h2->vertex();
+
+        v0->isNew = false;
+        v1->isNew = false;
+        v2->isNew = false;
+
+        VertexIter v3 = mesh.newVertex(); 
+        v3->isNew = true;
+        v3->position = (v0->position + v1->position + v2->position ) / 3.0;
+
+        EdgeIter e0 = mesh.newEdge();
+        EdgeIter e1 = mesh.newEdge();
+        EdgeIter e2 = mesh.newEdge();
+
+        e0->isNew = true;
+        e1->isNew = true;
+        e2->isNew = true;
+
+        HalfedgeIter h3 = mesh.newHalfedge();
+        HalfedgeIter h4 = mesh.newHalfedge();
+        HalfedgeIter h5 = mesh.newHalfedge();
+        HalfedgeIter h6 = mesh.newHalfedge();
+        HalfedgeIter h7 = mesh.newHalfedge();
+        HalfedgeIter h8 = mesh.newHalfedge();
+
+        FaceIter f1 = mesh.newFace();
+        FaceIter f2 = mesh.newFace();
+
+        // h0->next() = h3;
+        // h3->next() = h4;
+        // h4->next() = h0;
+        // h1->next() = h5;
+        // h5->next() = h6;
+        // h6->next() = h1;
+        // h2->next() = h7;
+        // h7->next() = h8;
+        // h8->next() = h2;
+
+        // h3->face() = f;
+        // h3->twin() = h6;
+        // h3->vertex() = v1;
+        // h3->edge() = e0;
+        // e0->halfedge() = h3;
+        h0->setNeighbors(h3,h0->twin(),v0,h0->edge(),f);
+        h1->setNeighbors(h5,h1->twin(),v1,h1->edge(),f1);
+        h2->setNeighbors(h7,h2->twin(),v2,h2->edge(),f2);
+        h3->setNeighbors(h4,h6,v1,e0,f);
+        h4->setNeighbors(h0,h7,v3,e2,f);
+        h5->setNeighbors(h6,h8,v2,e1,f1);
+        h6->setNeighbors(h1,h3,v3,e0,f1);
+        h7->setNeighbors(h8,h4,v0,e2,f2);
+        h8->setNeighbors(h2,h5,v3,e1,f2);
+
+        v3->halfedge() = h6;
+        e0->halfedge() = h3;
+        e1->halfedge() = h5;
+        e2->halfedge() = h7;
+        f1->halfedge() = h1;
+        f2->halfedge() = h2;
+       }
+
+       for (EdgeIter e = mesh.edgesBegin(); e != mesh.edgesEnd(); e++) {
+        if (e->isNew != true) {
+            VertexIter v0 = e->halfedge()->vertex();
+            VertexIter v1 = e->halfedge()->twin()->vertex();
+            if (v0->isNew != true && v1->isNew != true) {
+                mesh.flipEdge(e);
+            }
+        }
+       }
+
+    }
+
 
     void MeshResampler::upsample(HalfedgeMesh& mesh)
     // TODO Part 5.

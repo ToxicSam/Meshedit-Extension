@@ -27,12 +27,38 @@
 
       <h3 align="middle">Results</h3>
 
-    <h2 align="middle">Remeshing</h2>
+    <h2 align="middle">Resampling via Isotropic Remeshing</h2>
       <h3 align="middle">Technical Approach</h3>
-
+        <p> For remeshing, our approach was based on the paper <a url="http://graphics.uni-bielefeld.de/publications/disclaimer.php?dlurl=sgp04.pdf">here</a>. 
+        At a simple level our algorithm was the following: </p>
+        <ol>
+        <li>Find the average edge length </li>
+        <li>Split all edges that are longer than four thirds times the average</li>
+        <li>Collapse edges shorter than four fifths the average</li>
+        <li>If flipping an edge would bring the average vertex valence closer to 6, do so</li>
+        <li>Lastly, move vertices to decrease the average distance to their neighbors</li>
+        <li>Repeat</li>
+        </ol>
       <h3 align="middle">Problems Encountered</h3>
+        <p>The main issue we ran into with remeshing involved edge collapse.
+        Collapsing edges as we iterated through the list of edges proved to be very prone to errors since collapsing one edge deletes three edges from the mesh.
+        We eventually solved this by modifying our iterator in the case of a collapse so that we would not accidentally iterate over a no longer valid edge.</p>
 
       <h3 align="middle">Results</h3>
+        <div align="center">
+          <table style="width=100%">
+              <tr>
+                  <td align="middle">
+                  <img src="images/cowremesh.png"/>
+                  <figcaption align="middle"></figcaption>
+              </tr>
+              <tr>
+                  <td align="middle">
+                  <img src="images/beanremesh.png"/>
+                  <figcaption align="middle">Notice how the triangles on top have become equilateral</figcaption>
+              </tr>
+          </table>
+        </div>
 
     <h2 align="middle">Mesh Simplification</h2>
       <h3 align="middle">Technical Approach</h3>

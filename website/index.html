@@ -1,0 +1,141 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<style>  
+    div.padded {  
+      padding-top: 0px;  
+      padding-right: 100px;  
+      padding-bottom: 0.25in;  
+      padding-left: 100px;  
+    }  
+  </style> 
+<title>Meshedit Extension  |  CS 184</title>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="style.css" media="screen" />
+</head>
+<body>
+<br />
+<h1 align="middle">Final Report for Meshedit Extension</h1>
+    <h2 align="middle">By Nag Alluri, Kenny Chung, Tim Greeno</h2>
+
+    <h2 align="middle">Abstract</h2>
+
+    <h2 align="middle">Edge Collapse</h2>
+      <h3 align="middle">Technical Approach</h3>
+        <p>Set the neighbor pointers (next, twin, edge, vertex, face) for ALL halfedges; set halfedge pointers for ALL faces, edges, and vertices. </p>
+
+      <h3 align="middle">Problems Encountered</h3>
+
+      <h3 align="middle">Results</h3>
+      
+      <p>LESSONS LEARNED: When used with remeshing, which involved iterating over all edge pointers while performing edge collapse, certain edges might have beeb collapsed by the time we access them! We had to get creative with the ways we checked for these edge cases, specifically by comparing the number of edges before and after the collapse operation.</p>
+
+    <h2 align="middle">Resampling via Isotropic Remeshing</h2>
+      <h3 align="middle">Technical Approach</h3>
+        <p> For remeshing, our approach was based on the paper <a url="http://graphics.uni-bielefeld.de/publications/disclaimer.php?dlurl=sgp04.pdf">here</a>. 
+        At a simple level our algorithm was the following: </p>
+        <ol>
+        <li>Find the average edge length </li>
+        <li>Split all edges that are longer than four thirds times the average</li>
+        <li>Collapse edges shorter than four fifths the average</li>
+        <li>If flipping an edge would bring the average vertex valence closer to 6, do so</li>
+        <li>Lastly, move vertices to decrease the average distance to their neighbors</li>
+        <li>Repeat</li>
+        </ol>
+      <h3 align="middle">Problems Encountered</h3>
+        <p>The main issue we ran into with remeshing involved edge collapse.
+        Collapsing edges as we iterated through the list of edges proved to be very prone to errors since collapsing one edge deletes three edges from the mesh.
+        We eventually solved this by modifying our iterator in the case of a collapse so that we would not accidentally iterate over a no longer valid edge.</p>
+
+      <h3 align="middle">Results</h3>
+        <div align="center">
+          <table style="width=100%">
+              <tr>
+                  <td align="middle">
+                  <img src="images/cowremesh.png" width='800px'/>
+                  <figcaption align="middle"></figcaption>
+              </tr>
+              <tr>
+                  <td align="middle">
+                  <img src="images/beanremesh.png" width='800px'/>
+                  <figcaption align="middle">Notice how the triangles on top have become equilateral in the remeshed image (right)</figcaption>
+              </tr>
+          </table>
+        </div>
+
+    <h2 align="middle">Mesh Simplification</h2>
+      <h3 align="middle">Technical Approach</h3>
+
+      <h3 align="middle">Problems Encountered</h3>
+
+      <h3 align="middle">Results</h3>
+
+    <h2 align="middle">Sqrt(3) Upsampling</h2>
+      <h3 align="middle">Technical Approach</h3>
+      <p>For sqrt(3) upsampling, we modeled our algorithm after the paper <a url="https://www.graphics.rwth-aachen.de/media/papers/sqrt31.pdf">here</a>. 
+      At a glance, sqrt(3) upsampling takes every triangle in the mesh and splits it into 3. 
+      To accomplish this we designed our algorithm as follows:</p>
+      <ol>
+        <li>Iterate through each face of the mesh</li>
+        <li>Add a new vertex to the mesh located at the center of the considered triangle</li>
+        <li>Link each vertex of the original triangle to this new point with edges</li>
+        <li>Delete unecessary elements and reassign pointers for the new structure.</li>
+        <li>After doing this for all faces, flip all edges originally in the mesh that touch two vertices also originally in the mesh. </li>
+      </ol>
+      <div align="center">
+          <table style="width=100%">
+              <tr>
+                  <td align="middle">
+                  <img src="images/sqrt3figure.png" width='800px'/>
+                  <figcaption align="middle">A figure depicting the transformation</figcaption>
+              </tr>
+          </table>
+        </div>
+
+
+      <h3 align="middle">Problems Encountered</h3>
+      <p>We weren't able to get the smoothing algorithm working correctly in time, leading to a very bumpy surface.
+      This is especially noticeable in the second run of sqrt(3) subdivision. </p>
+
+      <h3 align="middle">Results</h3>
+      <div align="center">
+          <table style="width=100%">
+              <tr>
+                  <td align="middle">
+                  <img src="images/sqrt3cow.png" width='800px'/>
+                  <figcaption align="middle">Notice the bumps around the edges in sqrt(3)</figcaption>
+              </tr>
+              <tr>
+                  <td align="middle">
+                  <img src="images/sqrt3cow2.png" width='800px'/>
+                  <figcaption align="middle"></figcaption>
+              </tr>
+          </table>
+        </div>
+
+    <h2 align="middle">Extra Shaders</h2>
+      <h3 align="middle">Technical Approach</h3>
+
+      <h3 align="middle">Problems Encountered</h3>
+
+      <h3 align="middle">Results</h3>
+
+    <h2 align="middle">References</h2>
+      <a url="http://462cmu.github.io/asst2_meshedit/">CMU MeshEdit</a>
+      <a url="http://graphics.uni-bielefeld.de/publications/disclaimer.php?dlurl=sgp04.pdf">Botsch and Kobbelt, "A Remeshing Approach to Multiresolution Modeling" </a>
+      <a url="https://www.graphics.rwth-aachen.de/media/papers/sqrt31.pdf"> Sqrt(3)-Subdivision</a>
+
+    <h2 align="middle">Contributions</h2>
+      <p>Nag:</p>
+      <p>Kenny:</p>
+      <p>Tim: Implemented remeshing with Kenny, implemented Sqrt(3) subdivision</p>
+
+    <h2 align="middle">Lessons Learned</h2>
+
+</div>
+</body>
+</html>
+
+
+
+

@@ -20,7 +20,20 @@
 
     <h2 align="middle">Abstract</h2>
     <!-- A paragraph summary of the entire project. -->
-    Triangular meshes are ubiquitous in the world of graphics, used in diverse applications from 3D modeling to video game development. Thus, the ability to manipulate meshes to fit one's needs -- whether they are performance or detail oriented -- is paramount. With that in mind, we decided to unlock more of our existing mesh code's potential by implementing a diverse set of functionality: edge collapse, remeshing, mesh simplification, alternate upsampling, and new shaders.
+    <p>Triangular meshes are ubiquitous in the world of graphics, used in diverse applications from 3D modeling to video game development. Thus, the ability to manipulate meshes to fit one's needs -- whether they are performance or detail oriented -- is paramount. With that in mind, we decided to unlock more of our existing mesh code's potential by implementing a diverse set of functionality: edge collapse, remeshing, mesh simplification, alternate upsampling, and new shaders.</p>
+
+            <p> This is the main problem that our project will attempt to address--modifying mesh models in a way that reduces the various costs associated with their use.
+            The two methods for doing this we will employ are remeshing and mesh simplification. 
+            Remeshing is the act of modifying the mesh such that the triangles that make it up are near-equilateral and have similar areas. 
+            This makes the process of editing the mesh more efficient and allows algorithms on the mesh to be more robust. 
+            Mesh simplification revolves around simplifying the mesh, which makes most operations on the mesh more efficient because it is less complex.
+            This can be a difficult process, because the algorithm should ideally preserve as much detail of the original mesh as possible.
+        </p>
+        <p> For our project, we plan to integrate these two process into the Mesh Editing software developed in Homework 2.
+        To assist in developing our algorithms, we intend to use the following papers:
+        <a href='http://graphics.uni-bielefeld.de/publications/sgp04.pdf' >Remeshing </a>
+        and <a href='http://www.cs.cmu.edu/~./garland/Papers/quadrics.pdf' >Surface Simplification </a>
+        </p>
 
     <h2 align="middle">Edge Collapse</h2>
       <h3 align="middle">Technical Approach</h3>

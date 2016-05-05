@@ -22,13 +22,47 @@
 
     <h2 align="middle">Edge Collapse</h2>
       <h3 align="middle">Technical Approach</h3>
-        <p>Set the neighbor pointers (next, twin, edge, vertex, face) for ALL halfedges; set halfedge pointers for ALL faces, edges, and vertices. </p>
+      <!-- A 1-2 page summary of your technical approach, techniques used, algorithms implemented, etc. (use references to papers or other resources for further detail). Highlight how your approach varied from the references used (did you implement a subset, or did you change or enhance anything), the unique decisions you made and why. -->
+
+        <p>Using <a href="http://462cmu.github.io/asst2_meshedit/">Assignment 2 </a> of the CMU graphics class as a reference and the <a href="http://cs184.eecs.berkeley.edu/cs184_sp16/article/7/">Halfedge data structure</a>, we approached implementing Edge Collapse by keeping track of and correctly setting all pointers. These included the neighbor pointers (next, twin, edge, vertex, face) for all Halfedges, as well as the single Halfedge pointers for each face, edge and vertex. Our step-by-step approach can be summarized as follows:</p>
+        <ol>
+          <li>Draw a diagram of the to-be-collapsed edge and all adjacent elements; label each element with a name for clarity</li>
+          <li>Gather the elements in code with those names.</li>
+          <li>Using those names, reassign pointers to the arrangement required by the collapsed edge's neighborhood</li>
+          <li>Finally, after reassignment is complete, it is safe to actually delete unneeded elements from the mesh</li>
+        </ol>
+        <p>There were two caveats to this process: first, boundary edges cannot be safely collapsed without violating the <a href="http://cs184.eecs.berkeley.edu/cs184_sp16/lecture/geometry/slide_056">manifold-ness</a> of the mesh, so we would return an empty VertexIter() in that case without modification. Second, certain conditions of geometry had to met before we could safely collapse; this was a completely independent process from checking pointers and in fact required usage of these <a href="http://stackoverflow.com/questions/27049163/mesh-simplification-edge-collapse-conditions">geometry principles</a>:</p>
+        <ol>
+          <li>The two vertices of the collapsed edge must share only two neighboring vertices. We performed this with a simple double nested for-loop over both the first and second vertex's neighbors.</li>
+          <li>No triangles must be flipped as a result of the collapse. This was trickier to check for, and involved precalculating the triangle normal vectors of the 'before' and 'after' arrangements before any actual collapsing. By comparing the angle between the before and after normals, we were able to determine if this condition was violated and return appropriate values.</li>
+        </ol>
+        <p>These geometry conditions weren't actually mentioned in the CMU page, but were still crucial to maintaining manifold-ness after multiple collapses (especially on more complex meshes and mesh operations). Otherwise, our approach differed little from theirs, mostly because this was a fundamental operation with not a lot of freedom for other ways of implementation.</p>
 
       <h3 align="middle">Problems Encountered</h3>
+      <!-- A description of problems encountered and how you tackled them. -->
+        <p>We immediately encountered problems with pointers, either from incorrectly or neglecting setting them; this would result in nasty segfaults, or cause gaping holes to appear after successive collapses. Eventually we solved this by cleverly reducing the number of pointers we had to keep track of, since not all pointers needed to be set in order to make it work (e.g. the vertices on the outer perimeter of the neighborhood didn't need to be assigned anything at all). By being more surgical with our pointer assignments, it was easier to debug and ultimately pinpoint which pointers needed to be set in order to avoid the problems altogether.</p>
+        <p> 
+          Other problems arose when collapse had to be used in conjunction with other code (see below, edge collapse is foundational for both remeshing and simplification), mostly involving iteration and malloc errors; we solved these by handling cases where our iterators might run over already deleted elements, specifically by comparing the number of elements before and after one edge collapse. </p>
+      <h3 align="middle">Lessons Learned</h3>
+      <!-- A description of lessons learned. -->
+        <p>The main takeaway from this modest but crucial part was simplicity: while our collapse code initially contained 200+ lines of code, we were later able to reduce this to less than 100. This was after spending time thinking about the special ways to take care of pointer assignments when certain elements were bound to be deleted. We chose to change as little pointers as possible and this proved to be the better approach.</p>
 
       <h3 align="middle">Results</h3>
-      
-      <p>LESSONS LEARNED: When used with remeshing, which involved iterating over all edge pointers while performing edge collapse, certain edges might have beeb collapsed by the time we access them! We had to get creative with the ways we checked for these edge cases, specifically by comparing the number of edges before and after the collapse operation.</p>
+        <div align="center">
+            <table style="width=100%">
+                <tr>
+                    <td align="middle">
+                    <img src="images/quadball1.png" width='800px'/>
+                    <figcaption align="middle">Before collapse</figcaption>
+                </tr>
+                <tr>
+                    <td align="middle">
+                    <img src="images/quadball2.png" width='800px'/>
+                    <figcaption align="middle">After collapse</figcaption>
+                </tr>
+            </table>
+          </div>
+
 
     <h2 align="middle">Resampling via Isotropic Remeshing</h2>
       <h3 align="middle">Technical Approach</h3>

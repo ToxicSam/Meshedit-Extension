@@ -197,18 +197,15 @@ vec4 cook_torrance(vec3 lightPos) {
     float VdotH = dot(v, halfVector);
     float mSquared = roughnessValue * roughnessValue;
         
-    // geometric attenuation
     float NH2 = 2.0 * NdotH;
     float g1 = (NH2 * NdotV) / VdotH;
     float g2 = (NH2 * NdotL) / VdotH;
     float geoAtt = min(1.0, min(g1, g2));
      
-    // roughness (or: microfacet distribution function)
     float r1 = 1.0 / ( 4.0 * mSquared * pow(NdotH, 4.0));
     float r2 = (NdotH * NdotH - 1.0) / (mSquared * NdotH * NdotH);
     float roughness = r1 * exp(r2);
         
-    // fresnel
     float fresnel = pow(1.0 - VdotH, 5.0);
     fresnel *= (1.0 - F0);
     fresnel += F0;

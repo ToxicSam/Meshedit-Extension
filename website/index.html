@@ -7,7 +7,19 @@
       padding-right: 100px;  
       padding-bottom: 0.25in;  
       padding-left: 100px;  
-    }  
+    }
+    .button {
+    background-color: #4CAF50;
+    border: none;
+    color: white;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+  }  
   </style> 
 <title>Meshedit Extension  |  CS 184</title>
 <meta http-equiv="content-type" content="text/html; charset=utf-8" />
@@ -15,8 +27,20 @@
 </head>
 <body>
 <br />
-<h1 align="middle">Final Report for Meshedit Extension</h1>
+<h1 align="middle">Meshedit Extension</h1>
     <h2 align="middle">By Nag Alluri, Kenny Chung, Tim Greeno</h2>
+        <div align="middle">
+            <table style="width=100%">
+                <tr>
+                    <td align="middle">
+                    <img src="images/h1.png" width='460px'/>
+                    <td align="middle">
+                    <img src="images/h2.png" width='450px'/>
+                    <td align="middle">
+                    <img src="images/h3.png" width='470px'/>
+                </tr>
+            </table>
+        </div>
 
     <h2 align="middle">Abstract</h2>
     <!-- A paragraph summary of the entire project. -->
@@ -29,17 +53,18 @@
             Mesh simplification revolves around simplifying the mesh, which makes most operations on the mesh more efficient because it is less complex.
             This can be a difficult process, because the algorithm should ideally preserve as much detail of the original mesh as possible.
         </p>
-        <p> For our project, we plan to integrate these two process into the Mesh Editing software developed in Homework 2.
+        <p> For our project, we plan to integrate these two process along with an alternative upsampling scheme, Sqrt(3)-Subdivision, into the Mesh Editing software developed in Homework 2.
         To assist in developing our algorithms, we intend to use the following papers:
         <a href='http://graphics.uni-bielefeld.de/publications/sgp04.pdf' >Remeshing </a>
-        and <a href='http://www.cs.cmu.edu/~./garland/Papers/quadrics.pdf' >Surface Simplification </a>
+        and <a href='http://www.cs.cmu.edu/~./garland/Papers/quadrics.pdf' >Surface Simplification </a> and <a href="https://www.graphics.rwth-aachen.de/media/papers/sqrt31.pdf"> Sqrt(3)-Subdivision</a>
         </p>
+        <p> In addition, we also included two new shaders to Meshedit with our project. The first shader we included was a non-photorealistic cel shader which attempts to emulate images seen in cartoons or in comic books. The other shader we included was a Cook-Torrance shader. This shader attempts to simulate physical reality much closer than our previously implemented Phong Shading Model. </p>
 
     <h2 align="middle">Edge Collapse</h2>
       <h3 align="middle">Technical Approach</h3>
       <!-- A 1-2 page summary of your technical approach, techniques used, algorithms implemented, etc. (use references to papers or other resources for further detail). Highlight how your approach varied from the references used (did you implement a subset, or did you change or enhance anything), the unique decisions you made and why. -->
 
-        <p>Using <a href="http://462cmu.github.io/asst2_meshedit/">Assignment 2 </a> of the CMU graphics class as a reference and the <a href="http://cs184.eecs.berkeley.edu/cs184_sp16/article/7/">Halfedge data structure</a>, we approached implementing Edge Collapse by keeping track of and correctly setting all pointers. These included the neighbor pointers (next, twin, edge, vertex, face) for all Halfedges, as well as the single Halfedge pointers for each face, edge and vertex. Our step-by-step approach can be summarized as follows:</p>
+        <p>Using <a href="http://462cmu.github.io/asst2_meshedit/"> Meshedit </a> of the CMU graphics class as a reference and the <a href="http://cs184.eecs.berkeley.edu/cs184_sp16/article/7/">Halfedge data structure</a>, we approached implementing Edge Collapse by keeping track of and correctly setting all pointers. These included the neighbor pointers (next, twin, edge, vertex, face) for all Halfedges, as well as the single Halfedge pointers for each face, edge and vertex. Our step-by-step approach can be summarized as follows:</p>
         <ol>
           <li>Draw a diagram of the to-be-collapsed edge and all adjacent elements; label each element with a name for clarity</li>
           <li>Gather the elements in code with those names.</li>
@@ -58,9 +83,7 @@
         <p>We immediately encountered problems with pointers, either from incorrectly or neglecting setting them; this would result in nasty segfaults, or cause gaping holes to appear after successive collapses. Eventually we solved this by cleverly reducing the number of pointers we had to keep track of, since not all pointers needed to be set in order to make it work (e.g. the vertices on the outer perimeter of the neighborhood didn't need to be assigned anything at all). By being more surgical with our pointer assignments, it was easier to debug and ultimately pinpoint which pointers needed to be set in order to avoid the problems altogether.</p>
         <p> 
           Other problems arose when collapse had to be used in conjunction with other code (see below, edge collapse is foundational for both remeshing and simplification), mostly involving iteration and malloc errors; we solved these by handling cases where our iterators might run over already deleted elements, specifically by comparing the number of elements before and after one edge collapse. </p>
-      <h3 align="middle">Lessons Learned</h3>
-      <!-- A description of lessons learned. -->
-        <p>The main takeaway from this modest but crucial part was simplicity: while our collapse code initially contained 200+ lines of code, we were later able to reduce this to less than 100. This was after spending time thinking about the special ways to take care of pointer assignments when certain elements were bound to be deleted. We chose to change as little pointers as possible and this proved to be the better approach.</p>
+        
 
       <h3 align="middle">Results</h3>
         <div align="center">
@@ -112,12 +135,83 @@
           </table>
         </div>
 
-    <h2 align="middle">Mesh Simplification</h2>
+    <h2 align="middle">Downsampling via Quadric Error Simplification</h2>
+
+        <div align="middle">
+            <table style="width=100%" border="1px" cellpadding="10px">
+                <tr>
+                    <td align="middle">
+                    <img src="images/teapot1.png" width='520px'/>
+                    <figcaption align="middle">Original Mesh</figcaption>
+                    <td align="middle">
+                    <img src="images/teapot2.png" width='500px'/>
+                    <figcaption align="middle">Simplified Mesh</figcaption>
+                </tr>
+            </table>
+        </div>
+
       <h3 align="middle">Technical Approach</h3>
+      <p> The main idea behind Mesh Simplification is to develop a technique to systematically collapse edges within our mesh until we reach a target number of triangles while maintaining as much of the features of the original figure as possible. Our implementation of Mesh Simplification, described by <a href="http://462cmu.github.io/asst2_meshedit/"> CMU Meshedit </a>, used a Quadric Error Matrix to define the distance of a given vertex from the original surface plane. </p>
+
+      <div align="middle">
+          <img src="images/q1.png" style="width:500px;">
+          <figcaption align="middle"> We can model the distance from vertex to the plane along the normal vector</figcaption>
+      </div>
+
+      <p>  Using this metric, we were able to calculate the new optimal point that minimized quadric error after each edge collapse. Our algorithm then used a greedy approach to collapse edges based on the minimum quadric error. In order to efficiently keep track of the best edges to collapse, our implementation utilized a PriorityQueue, in which we place each EdgeRecord, a class that contained all relevant details about a given edge. The algorithm to initialize each EdgeRecord is as described: </p>
+      <ol>
+        <li>Compute a quadric for each edge as the sum of the quadrics at endpoints.</li>
+        <li>Build a 3x3 linear system for the optimal collapsed point</li>
+        <li>Solve this system and store the optimal point in the EdgeRecord class</li>
+        <li>Compute the corresponding error value and store it in the EdgeRecord class</li>
+        <li>Store the given edge in the EdgeRecord class</li>
+      </ol>
+      <p> Our overall downsampling routine followed an algorithm similar to the following: </p>
+      <ol>
+        <li>Compute quadrics for each face by simply writing the plane equation for that face in homogeneous coordinates, and building the corresponding quadric matrix using an outer product</li>
+        <li>Compute an initial quadric for each vertex by adding up the quadrics at all the faces touching that vertex. </li>
+        <li>For each edge, create an EdgeRecord and add it to one global PriorityQueue</li>
+        <li>Until a target number of triangles is reached, collapse the best/cheapest edge (as determined by the priority queue), and set the quadric at the new vertex to the sum of the quadrics at the endpoints of the original edge while making sure to also have updated the cost of any edge connected to this vertex.</li>
+      </ol>
+
+      <div align="middle">
+          <img src="images/q2.png" style="width:500px;">
+          <figcaption align="middle"> The Quadric Error for a vertex is the sum of the Quadric Error of its neighboring faces</figcaption>
+      </div>
 
       <h3 align="middle">Problems Encountered</h3>
+      <p> The main problem that we encountered during our implementation of Mesh Simplification was the dependence of our algorithm upon our previously implemented EdgeCollapse function. This led to situations where debugging became difficult due to the fact that we were unsure if the source of our bug lived in our implementation of simplification or in our implementation of EdgeCollapse. </p>
 
       <h3 align="middle">Results</h3>
+
+        <div align="middle">
+          <img src="images/scow.gif" alt="scow" style="width:500px;">
+        </div>
+
+        <p> The interesting thing to observe with the results of our Mesh Simplification algorithm is the clear tradeoff with the shape and detail of our figure with each iteration of our algorithm. In the case of our cow figure, simplifying our mesh more than twice barely makes the figure recognizable! </p>
+
+        <div align="middle">
+            <table style="width=100%" border="1px" cellpadding="10px">
+                <tr>
+                    <td align="middle">
+                    <img src="images/scow1.png" width='460px'/>
+                    <figcaption align="middle">Original Mesh</figcaption>
+                    <td align="middle">
+                    <img src="images/scow2.png" width='510px'/>
+                    <figcaption align="middle">Simplified Once</figcaption>
+                </tr>
+                <tr>
+                    <td align="middle">
+                    <img src="images/scow3.png" width='480px'/>
+                    <figcaption align="middle">Simplified Twice</figcaption>
+                    <td align="middle">
+                    <img src="images/scow4.png" width='500px'/>
+                    <figcaption align="middle">Simplified 3x</figcaption>
+                </tr>
+            </table>
+        </div>
+
+
 
     <h2 align="middle">Sqrt(3) Upsampling</h2>
       <h3 align="middle">Technical Approach</h3>
@@ -142,6 +236,7 @@
         </div>
 
 
+
       <h3 align="middle">Problems Encountered</h3>
       <p>We weren't able to get the smoothing algorithm working correctly in time, leading to a very bumpy surface.
       This is especially noticeable in the second run of sqrt(3) subdivision. </p>
@@ -163,23 +258,195 @@
         </div>
 
     <h2 align="middle">Extra Shaders</h2>
-      <h3 align="middle">Technical Approach</h3>
+    <div align="middle">
+      <p> Beyond the simply augmenting our Mesh software, with additional features like Remeshing and Mesh Simplification, our group also decided to include additional shaders to make our meshes more aesthetically pleasing. The two shaders that we implemented were Cel Shading and Cook-Torrance shading. Cel shading, also known as cartoon shading, is a shading model used to take 3D meshes and visualize them as a flat 2D surface, similar to a comic book. Cook-Torrance shading is a shading model developed by Robert Cook and Kenneth Torrance that aims to simulate physical reality more closely than models like Phong Shading. Cook-Torrance shading emulates different material surfaces by treating each surface as being comprised of many different microfacets. </p>
+      
+      <h3 align="middle">Cel Shading</h3>
+      <p> In order to implement Cel Shading, the first thing that had to be accomplished was to capture the intensity of light at a given surface position along the figure. This was accomplished by calculating the dot product between the light vector and the normal vector. The figure below depicts how light impacts a surface and the intensity can be calculated: </p>
 
-      <h3 align="middle">Problems Encountered</h3>
+      <div align="middle">
+          <img src="images/q3.png" style="width:200px;">
+      </div>
 
+      <p> After calculating the intensity value, the next part of the implementation involves dividing up the surface of the figure based upon how much light is reaching that area and then including the appropriate color shader. For example, the area where the light directly hits the surface of the mesh is significantly lighter than the surface of the mesh that is pointing away from the light. The figure below depicts the main idea behind this implementation: </p>
+
+      <div align="middle">
+          <img src="images/q4.jpg" style="width:500px;">
+      </div>
+
+    </div>
       <h3 align="middle">Results</h3>
+        <div align="middle">
+          <video id="video1" width="800" height="500" autoplay>
+          <source src="images/celshaderdemo.mp4" type="video/mp4">
+          </video>
+        </div>
+        <div align="middle">
+          <button class="button" onclick="playPause()">Play/Pause</button>
+        </div>
+        <script> 
+        var myVideo = document.getElementById("video1"); 
+
+        function playPause() { 
+        if (myVideo.paused) 
+          myVideo.play(); 
+        else 
+          myVideo.pause(); 
+        }
+        </script>  
+
+      <div align="middle">
+        <p> The clip above demonstrates how cel shading works with respect to the light intensity at different points. An interesting point to note is how the shader adapts as the figure is rotated about. The images below depict other figures that are using the cel shader. </p>
+      </div>
+<!--         <div align="middle">
+            <table style="width=100%" border="1px" cellpadding="10px">
+                <tr>
+                    <td align="middle">
+                    <img src="images/c1.png" width="500px" />
+                    <figcaption align="middle">Cartoon Teapot</figcaption>
+                    <img src="images/c2.png" width="500px" />
+                    <figcaption align="middle">Cartoon Cow</figcaption>
+                    <img src="images/c3.png" width="500px" />
+                    <figcaption align="middle">Cartoon Torus</figcaption>
+                </tr>
+            </table>
+        </div>
+        <div align="middle"> -->
+
+        <div align="middle">
+            <table style="width=100%">
+                <tr>
+                    <td align="middle">
+                    <img src="images/c1.png" width='520px'/>
+                    <figcaption align="middle">Cartoon Teapot</figcaption>
+                    <td align="middle">
+                    <img src="images/c3.png" width='440px'/>
+                    <figcaption align="middle">Cartoon Torus</figcaption>
+                </tr>
+            </table>
+        </div>
+        <div align="middle">
+          <p> The images below highlight the differences between phong shading and cel shading. With phong shading, the shader accentuate the three-dimensionality of the figure. In the case of cel shading, the figure appears to be a flat surface almost as if it were cut and pasted out of a comic book. </p>
+        </div>
+
+        <div align="middle">
+            <table style="width=100%" border="1px" cellpadding="10px">
+                <tr>
+                    <td align="middle">
+                    <img src="images/comp1.png" width='520px'/>
+                    <figcaption align="middle">Phong Shading</figcaption>
+                    <td align="middle">
+                    <img src="images/comp2.png" width='530px'/>
+                    <figcaption align="middle">Cel Shading</figcaption>
+                </tr>
+            </table>
+        </div>
+
+
+      <h3 align="middle">Cook-Torrance Shading</h3>
+        <div align="middle">
+          <p> The implementation of Cook-Torrance shading consisted of three main components: Fresnel factor, Roughness (microfacet distribution), and Geometrical attenuation. </p>
+          <p> The Fresnel factor defines what proportion of incoming light that is reflected and transmitted. Since it is rather computationally expensive to compute this, we can use Shlick's approximation for this calculation. </p>
+          <div align="middle">
+            <img src="images/f1.png" style="width:300px;">
+          </div>
+          <p> Another component of the Cook-Torrance shading model is the Roughness factor. This factor defines the proportion of microfacets whose normal vectors point the same direction as the halfway vector v. On smooth surfaces that have a low roughness factor, all microfacets orient in the same direction which causes all reflected light to be closer to the reflection vector. On rough surfaces, since the microfacets are oriented in different ways, the light is diffused throughout the surface of the object. In my implementation of the roughness factor, I used Beckman's distribution function as depicted below to calculate the distribution.</p>
+          <div align="middle">
+            <img src="images/f2.png" style="width:450px;">
+          </div>
+          <p>The third component of the Cook-Torrance shading model is Geometric Attenuation. Geometric Attenuation defines how light may be affected entering or exiting the surface of the object. More specifically, this component models how some of the microfacets may block incoming light before it reaches the surface of the object or how reflected light may be blocked on its way out. ligSome of the microfacets block the incoming light before reaching the surface or after being reflected. The geometrical attenuation factor represents the total amount of light that is left after these processes are taken into consideration. In the formula below, we calculate the geometric attenuation factor as a minimum of three values. The first value is the case when the microfacets do not affect the light. The second value is the case when reflected light is blocked. The third value is the case when light is blocked before it reaches the next microfacet. </p>
+          <div align="middle">
+            <img src="images/f3.png" style="width:400px;">
+          </div>
+          <p> Similar to the Phong shading model, the Cook-Torrance model also contains ambient, diffuse, and specular reflection. After all three of the components described above are calculated, we can utilize the formulas specified below to calculate the reflection of our object</p>
+          <div align="middle">
+            <img src="images/f4.png" style="width:150px;">
+          </div>
+          <div align="middle">
+            <img src="images/f5.png" style="width:350px;">
+          </div>
+        </div>
+      <p> 
+
+         
+
+    <h3 align="middle">Results</h3>
+
+
+    <div align="middle">
+      <tr>
+          <img src="images/t1.png" width='800px'/>
+          <figcaption align="middle">Gold Teapot</figcaption>
+          <img src="images/t2.png" width='800px'/>
+          <figcaption align="middle">Rose Gold Car</figcaption>
+          <img src="images/t3.png" width='800px'/>
+          <figcaption align="middle">Copper Teapot</figcaption>
+          <img src="images/t4.png" width='800px'/>
+          <figcaption align="middle">Silver Cow</figcaption>
+      </tr>
+    </div>
+    <div align="middle">
+      <p> The images below demonstrate the difference between Phong Shading and Cook-Torrance Shading. It is definitely evident by observation that the Cook-Torrance Shading Model appears to emulate physical reality more closely than the Phong Shading Model. The point on the surface where light hits in the Cook-Torrance shading model appear glossy, giving the Torus on the right more of a metallic feel. On the other hand, the Phong Shading model appears to be a lot more artificial in terms of its surface reflection, giving the Torus on the left more of a plastic feel. </p>
+    </div>
+     <div align="middle">
+            <table style="width=100%" border="1px" cellpadding="10px">
+                <tr>
+                    <td align="middle">
+                    <img src="images/comp3.png" width='520px'/>
+                    <figcaption align="middle">Phong Shading</figcaption>
+                    <td align="middle">
+                    <img src="images/comp4.png" width='550px'/>
+                    <figcaption align="middle">Cook-Torrance Shading</figcaption>
+                </tr>
+            </table>
+    </div>
+    <div align="middle">
+      <p> Another interesting aspect of the Cook-Torrance Shading Model is the fact that the roughness value can be adjusted to produce differing images. In the image on the left, the roughness value is equal to 0.3, indicating that the surface of the teapot is very smooth. In the image on the right, the roughness value is equal to 0.8, indicating that the surface of the teapot is very rough. The smooth teapot reflects light closer to the reflection vector; whereas, the rough teapot has more distributed light giving the surface more of a matte look. </p>
+    </div>
+     <div align="middle">
+            <table style="width=100%" border="1px" cellpadding="10px">
+                <tr>
+                    <td align="middle">
+                    <img src="images/comp5.png" width='550px'/>
+                    <figcaption align="middle">Smooth Surface (roughness = 0.3)</figcaption>
+                    <td align="middle">
+                    <img src="images/comp6.png" width='550px'/>
+                    <figcaption align="middle">Rough Surface (roughness = 0.8)</figcaption>
+                </tr>
+            </table>
+    </div>
+    <h2 align="middle">Takeaways and Final Remarks</h2>
+    <div align="middle">
+    <p>Our final project required a lot of work but at the end of the day it was incredibly rewarding. After implementing so many different Mesh augmentations we've gotten a good grasp of how meshes work and how equally useful and horrific the HalfEdge data structure can be. In one of the early portions of our assignment, we found ourselves struggling with the implementation of Edge Collapse. The main takeaway from this modest but crucial part was simplicity: while our collapse code initially contained 200+ lines of code, we were later able to reduce this to less than 100. This was after spending time thinking about the special ways to take care of pointer assignments when certain elements were bound to be deleted. We chose to change as little pointers as possible and this proved to be the better approach. In order to create the different shaders, we had to familiarize ourselves with the different with glsl and understand how a fragment shader works. Specifically with the Cook-Torrance model, we were introduced to the many different nuances of lighting models and how complicated it can be to model light as it functions in the real world. </p>
+    <p>
+      We definitely enjoyed working on this project and hope you enjoyed reading about our work as well!</p>
+    </div>
 
     <h2 align="middle">References</h2>
-      <a url="http://462cmu.github.io/asst2_meshedit/">CMU MeshEdit</a>
-      <a url="http://graphics.uni-bielefeld.de/publications/disclaimer.php?dlurl=sgp04.pdf">Botsch and Kobbelt, "A Remeshing Approach to Multiresolution Modeling" </a>
-      <a url="https://www.graphics.rwth-aachen.de/media/papers/sqrt31.pdf"> Sqrt(3)-Subdivision</a>
-
+    <div align="middle">
+    <p>
+      <a href="http://462cmu.github.io/asst2_meshedit/"> CMU Meshedit </a>
+    </p>
+    <p>
+      <a href="http://graphics.uni-bielefeld.de/publications/disclaimer.php?dlurl=sgp04.pdf"> Botsch and Kobbelt, "A Remeshing Approach to Multiresolution Modeling" </a>
+    </p>
+    <p>
+      <a href="https://www.graphics.rwth-aachen.de/media/papers/sqrt31.pdf"> Sqrt(3)-Subdivision</a>
+    </p>
+    <p>
+      <a href="http://www.cs.columbia.edu/~belhumeur/courses/appearance/cook-torrance.pdf"> Cook-Torrance Shading Model </a>
+    </p>
+    <p>
+      <a href="http://zach.in.tu-clausthal.de/teaching/cg_literatur/glsl_tutorial/#toon"> Cel Shading Model </a>
+    </p>
+    </div>
     <h2 align="middle">Contributions</h2>
-      <p>Nag:</p>
+    <div align="middle">
+      <p>Nag: Implemented edge collapse with Kenny, Mesh Simplification, Cel Shading, and Cook-Torrance Shading</p>
       <p>Kenny: Implemented edge collapse with Nag and remeshing with Tim</p>
       <p>Tim: Implemented remeshing with Kenny, implemented Sqrt(3) subdivision</p>
-
-    <h2 align="middle">Lessons Learned</h2>
+    </div>
+    
 
 </div>
 </body>

@@ -59,6 +59,91 @@
         and <a href='http://www.cs.cmu.edu/~./garland/Papers/quadrics.pdf' >Surface Simplification </a> and <a href="https://www.graphics.rwth-aachen.de/media/papers/sqrt31.pdf"> Sqrt(3)-Subdivision</a>
         </p>
         <p> In addition, we also included two new shaders to Meshedit with our project. The first shader we included was a non-photorealistic cel shader which attempts to emulate images seen in cartoons or in comic books. The other shader we included was a Cook-Torrance shader. This shader attempts to simulate physical reality much closer than our previously implemented Phong Shading Model. </p>
+    <h2 align="middle">Keyboard Commands</h2>
+<div align="middle">
+      <center><p></p>
+
+<table>
+<thead>
+<tr>
+  <th>Command</th>
+  <th align="center">Key</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Flip the selected edge</td>
+  <td align="center"><kbd>F</kbd></td>
+</tr>
+<tr>
+  <td>Split the selected edge</td>
+  <td align="center"><kbd>S</kbd></td>
+</tr>
+<tr>
+  <td>Upsample the current mesh using Loop Subdivision</td>
+  <td align="center"><kbd>U</kbd></td>
+</tr>
+<tr>
+  <td>Downsample the current mesh</td>
+  <td align="center"><kbd>Z</kbd></td>
+</tr>
+<tr>
+  <td>Remesh the current mesh</td>
+  <td align="center"><kbd>X</kbd></td>
+</tr>
+<tr>
+  <td>Upsample the current mesh using Sqrt(3) Subdivision</td>
+  <td align="center"><kbd>3</kbd></td>
+</tr>
+<tr>
+  <td>Toggle information overlay</td>
+  <td align="center"><kbd>I</kbd></td>
+</tr>
+<tr>
+  <td>Select the next halfedge</td>
+  <td align="center"><kbd>N</kbd></td>
+</tr>
+<tr>
+  <td>Select the twin halfedge</td>
+  <td align="center"><kbd>T</kbd></td>
+</tr>
+<tr>
+  <td>Collapse the selected edge</td>
+  <td align="center"><kbd>C</kbd></td>
+</tr>
+<tr>
+  <td>Switch to GLSL shaders</td>
+  <td align="center"><kbd>W</kbd></td>
+</tr>
+<tr>
+  <td>Switch between GLSL shaders</td>
+  <td align="center"><kbd>0-5</kbd></td>
+</tr>
+<tr>
+  <td>Toggle using area-averaged normals</td>
+  <td align="center"><kbd>Q</kbd></td>
+</tr>
+<tr>
+  <td>Recompile shaders</td>
+  <td align="center"><kbd>R</kbd></td>
+</tr>
+<tr>
+  <td>Reset camera to default position</td>
+  <td align="center"><kbd>SPACE</kbd></td>
+</tr>
+<tr>
+  <td>Edit a vertex position</td>
+  <td align="center">(click and drag on vertex)</td>
+</tr>
+<tr>
+  <td>Rotate camera</td>
+  <td align="center">(click and drag on background, or right click)</td>
+</tr>
+</tbody>
+</table>
+
+<p></p></center>
+</div>
 
     <h2 align="middle">Edge Collapse</h2>
       <h3 align="middle">Technical Approach</h3>
@@ -446,6 +531,7 @@
       <p>Kenny: Implemented edge collapse with Nag and remeshing with Tim</p>
       <p>Tim: Implemented remeshing with Kenny, implemented Sqrt(3) subdivision</p>
     </div>
+
     
 
 </div>

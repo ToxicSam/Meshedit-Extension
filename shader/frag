@@ -184,7 +184,6 @@ vec4 cook_torrance(vec3 lightPos) {
     vec3 lightColor = vec3(0.245, 0.209, 0.81);
     //vec3 lightColor = vec3(0.690, 0.769, 0.87); //steel
     //vec3 lightColor = vec3(1.000, 0.843, 0.000); //gold
-    //vec3 lightColor = vec3(0.753, 0.451, 0.753); //silver
     //vec3 lightColor = vec3(0.722, .451, .2);
     vec3 lightDirection = normalize(lightPos - vertex);
     float NdotL = dot(n, l);
